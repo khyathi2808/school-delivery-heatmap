@@ -10,9 +10,17 @@
     background: #f4f5f7;
     color: #1f2430;
     margin: 0;
-    padding: 24px;
+    padding: 0;
   }
-  #app { max-width: 920px; margin: 0 auto; }
+  #app { max-width: 920px; margin: 0 auto; padding: 24px; }
+
+  .hero { background: linear-gradient(160deg, #1f2430 0%, #0d0f14 100%); color: #fff; padding: 72px 24px 60px; text-align: center; }
+  .hero-inner { max-width: 600px; margin: 0 auto; }
+  .hero-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #6fa8ff; margin-bottom: 16px; display: inline-block; }
+  .hero-headline { font-size: clamp(24px, 3.6vw, 36px); font-weight: 700; line-height: 1.25; margin: 0 0 16px; }
+  .hero-sub { font-size: 14px; line-height: 1.65; color: #b9bfcc; margin: 0 0 26px; }
+  .hero-scroll { font-size: 12px; font-weight: 600; letter-spacing: .04em; color: #6fa8ff; text-decoration: none; border: 1px solid rgba(111,168,255,.4); border-radius: 24px; padding: 9px 20px; display: inline-block; transition: background .15s ease; }
+  .hero-scroll:hover { background: rgba(111,168,255,.12); }
   h2 { margin: 0 0 4px; font-size: 20px; }
   .sub { font-size: 13px; color: #666; margin-bottom: 18px; }
   table { border-collapse: separate; border-spacing: 6px; width: 100%; }
@@ -72,7 +80,16 @@
 </style>
 </head>
 <body>
+<section class="hero">
+  <div class="hero-inner">
+    <span class="hero-eyebrow">Time · Priority — Teacher Delivery</span>
+    <h1 class="hero-headline">Know which classrooms need attention before it shows up in results.</h1>
+    <p class="hero-sub">Every grade × subject combination, and every new hire's ramp, filtered down to where a principal should actually look first.</p>
+    <a class="hero-scroll" href="#report">See the delivery heatmap ↓</a>
+  </div>
+</section>
 <div id="app">
+  <a id="report"></a>
   <h2>School Delivery Heatmap</h2>
   <div class="sub">Every grade &times; subject combination, colored by delivery status. Click a cell, then click a teacher's name to see their trajectory.</div>
 

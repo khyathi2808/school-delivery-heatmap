@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>School Delivery Heatmap</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f4f5f7;
+    color: #1f2430;
+    margin: 0;
+    padding: 24px;
+  }
+  #app { max-width: 920px; margin: 0 auto; }
+  h2 { margin: 0 0 4px; font-size: 20px; }
+  .sub { font-size: 13px; color: #666; margin-bottom: 18px; }
+  table { border-collapse: separate; border-spacing: 6px; width: 100%; }
+  th { font-size: 12px; color: #666; font-weight: 600; padding: 4px; text-align: center; }
+  th.rowlabel, td.rowlabel { text-align: right; padding-right: 10px; font-size: 12.5px; font-weight: 600; color: #444; }
+  td.cell {
+    border-radius: 10px; height: 62px; text-align: center; vertical-align: middle;
+    cursor: pointer; position: relative; font-size: 11.5px; font-weight: 600; color: white;
+    transition: transform .1s ease;
+  }
+  td.cell:hover { transform: scale(1.04); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
+  td.cell.na { background: #eceef1; color: #b7bac0; cursor: default; }
+  td.cell.na:hover { transform: none; box-shadow: none; }
+  .cell-count { font-size: 10px; font-weight: 400; opacity: 0.9; }
+  td.cell.mixed { color: #2a2a2a; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+  .mixed-tag { font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; opacity: 0.85; }
+  .legend { display: flex; gap: 16px; margin: 16px 0 20px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #444; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  #detail {
+    background: white; border: 1px solid #e6e8ec; border-radius: 12px; padding: 14px;
+    display: none;
+  }
+  #detail h3 { margin: 0 0 8px; font-size: 14.5px; }
+  .trow { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-top: 1px solid #f0f1f3; font-size: 13px; cursor: pointer; border-radius: 6px; }
+  .trow:hover { background: #f7f8fa; }
+  .trow:first-of-type { border-top: none; }
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 600; }
+  .panel { background: #fafbfc; border: 1px solid #eceef1; border-radius: 10px; padding: 12px; margin-top: 10px; }
+  .panel-title { font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; }
+  .legend-row { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; font-size: 11.5px; }
+
+  #rampSection { background: white; border: 1px solid #e6e8ec; border-radius: 12px; padding: 16px; margin-top: 22px; }
+  #rampSection h2 { font-size: 17px; margin: 0 0 4px; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .chip {
+    padding: 5px 12px; border-radius: 20px; font-size: 12.5px; cursor: pointer;
+    border: 1px solid #d7dae0; background: white; color: #444; font-weight: 500;
+  }
+  .chip.active { border-color: transparent; color: white; }
+  .chip.all.active { background: #444; }
+  .ramp-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .ramp-card {
+    flex: 1 1 150px; border-radius: 9px; padding: 9px 11px; font-size: 12px;
+  }
+  .ramp-card .rname { font-weight: 600; font-size: 12.5px; margin-bottom: 2px; }
+  .ramp-card .rstat { font-size: 11px; }
+
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: #fff; background: #1f2430;
+    border: none; border-radius: 8px; padding: 10px 18px; margin-top: 22px;
+    cursor: pointer; transition: background .15s ease;
+  }
+  .dl-btn:hover { background: #333a48; }
+  .dl-btn .dl-icon { font-size: 14px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <h2>School Delivery Heatmap</h2>
+  <div class="sub">Every grade &times; subject combination, colored by delivery status. Click a cell, then click a teacher's name to see their trajectory.</div>
+
+  <div class="legend" id="legend"></div>
+  <table id="grid"></table>
+  <div id="detail"></div>
+
+  <div id="rampSection">
+    <h2>New-Teacher Ramp Curve</h2>
+    <div class="sub" style="margin-bottom:0;">How fast each new hire's classes are closing the gap to expected pace, against a typical ramp benchmark.</div>
+    <div class="chips" id="rampChips"></div>
+    <div id="rampChartBox"></div>
+    <div class="ramp-summary" id="rampSummary"></div>
+  </div>
+
+  <button type="button" class="dl-btn" id="dlDocHeatmap"><span class="dl-icon">&#8681;</span> Download Report</button>
+</div>
+
+<script>
+(function(){
+  var STATUS_META = {
+    'early-support': { label: 'Early Support', color: '#c0392b', bg:'#fbe9e7', rank:4 },
+    'declining':     { label: 'Declining',     color: '#d98324', bg:'#fdf1e0', rank:3 },
+    'improving':     { label: 'Improving',     color: '#2b7de0', bg:'#e9f2fd', rank:2 },
+    'on-track':      { label: 'On Track',      color: '#2f9e5a', bg:'#e8f7ee', rank:1 }
+  };
+  var MONTHS = ['Feb','Mar','Apr','May','Jun','Jul'];
+
+  // realistic-ish noisy trajectories: actual vs a diminishing-growth expected curve (grade-level pace)
+  var raw = [
+    { name:'Arjun Pillai',      subject:'Math',           grade:6, section:'A', actual:[50,53,57,60,63,65], expected:[50,54,58,61,64,66] },
+    { name:'Farah Iqbal',       subject:'Math',           grade:6, section:'B', actual:[52,54,57,58,58,59], expected:[52,56,60,63,66,68] },
+    { name:'Kavita Joshi',      subject:'Science',        grade:6, section:'A', actual:[48,49,48,45,42,38], expected:[48,52,56,59,62,64] },
+    { name:'Meera Fernandes',   subject:'English',        grade:6, section:'A', actual:[55,57,61,64,67,69], expected:[55,59,63,66,69,71] },
+
+    { name:'Farah Khan',        subject:'Math',           grade:7, section:'A', actual:[45,45,47,51,56,62], expected:[51,55,59,62,65,67], isNewHire:true, joined:'Feb (Month 1)' },
+    { name:'Ibrahim Sheikh',    subject:'Science',        grade:7, section:'A', actual:[52,52,50,47,43,38], expected:[52,56,60,63,66,68] },
+    { name:'Priya Menon',       subject:'English',        grade:7, section:'A', actual:[60,63,68,71,73,76], expected:[60,64,68,71,74,76] },
+    { name:'Vikram Shah',       subject:'English',        grade:7, section:'B', actual:[58,59,62,63,62,63], expected:[58,62,66,69,72,74] },
+    { name:'Rina Kapoor',       subject:'Social Studies', grade:7, section:'A', actual:[50,52,56,59,62,64], expected:[50,54,58,61,64,66] },
+
+    { name:'Meena Iyer',        subject:'Math',           grade:8, section:'A', actual:[52,55,59,62,65,67], expected:[52,56,60,63,66,68] },
+    { name:'Rakesh Verma',      subject:'Math',           grade:8, section:'B', actual:[54,56,59,60,60,61], expected:[54,58,62,65,68,70] },
+    { name:'Nikhil Bhatt',      subject:'Science',        grade:8, section:'A', actual:[44,44,46,50,55,60], expected:[49,53,57,60,63,65], isNewHire:true, joined:'Feb (Month 1)' },
+    { name:'Sana Ali',          subject:'English',        grade:8, section:'A', actual:[58,61,65,68,70,73], expected:[58,62,66,69,72,74] },
+    { name:'Neha Kulkarni',     subject:'Social Studies', grade:8, section:'A', actual:[49,50,48,45,42,38], expected:[49,53,57,60,63,65] },
+
+    { name:'Sanjay Kumar',      subject:'Math',           grade:9, section:'A', actual:[43,44,46,50,55,60], expected:[49,53,57,60,63,65], isNewHire:true, joined:'Feb (Month 1)' },
+    { name:'Ananya Rao',        subject:'Science',        grade:9, section:'A', actual:[42,42,45,49,54,58], expected:[47,51,55,58,61,63], isNewHire:true, joined:'Feb (Month 1)' },
+    { name:'Suresh Nair',       subject:'Science',        grade:9, section:'B', actual:[44,43,41,38,34,29], expected:[44,48,52,55,58,60], isNewHire:true, joined:'Feb (Month 1)' },
+    { name:'Rohan Desai',       subject:'English',        grade:9, section:'A', actual:[55,57,62,65,68,70], expected:[55,59,63,66,69,71] },
+    { name:'Tara Joseph',       subject:'Social Studies', grade:9, section:'A', actual:[47,50,53,56,59,61], expected:[47,51,55,58,61,63] },
+
+    { name:'Devika Menon',      subject:'Science',        grade:10, section:'A', actual:[46,48,52,55,58,60], expected:[46,50,54,57,60,62] },
+    { name:'Deepa Krishnan',    subject:'Social Studies', grade:10, section:'A', actual:[42,42,44,48,52,57], expected:[46,50,54,57,60,62], isNewHire:true, joined:'Feb (Month 1)' }
+  ];
+
+  function classify(actual, expected){
+    var n = actual.length-1;
+    var gap = actual[n]-expected[n];
+    var gapPrev = actual[n-1]-expected[n-1];
+    var delta = gap-gapPrev;
+    if(gap>=-4) return 'on-track';
+    if(delta>=2) return 'improving';
+    if(gap<=-12) return 'early-support';
+    return 'declining';
+  }
+
+  // Shared y-axis label scheme for every chart in this file (trajectory, comparison, ramp curve)
+  var AXIS_LABELS = [
+    { label: 'EXCELLING',     color: '#2f9e5a' },
+    { label: 'ON TRACK',      color: '#2b7de0' },
+    { label: 'IMPROVING',     color: '#d98324' },
+    { label: 'NEEDS SUPPORT', color: '#c0392b' }
+  ];
+  function drawAxisLabels(min, max, y, w, pad){
+    var svg = '';
+    for(var i=0;i<4;i++){
+      var gv = min + (max-min)*(3-i)/3;
+      var gy = y(gv);
+      svg += '<line x1="'+pad.l+'" y1="'+gy+'" x2="'+(w-pad.r)+'" y2="'+gy+'" stroke="#eee" stroke-width="1"/>';
+      svg += '<text x="'+pad.l+'" y="'+(gy-3)+'" font-size="8" fill="'+AXIS_LABELS[i].color+'" font-weight="600" letter-spacing="0.03em">'+AXIS_LABELS[i].label+'</text>';
+    }
+    return svg;
+  }
+
+  var teachers = raw.map(function(t,i){
+    var n = t.actual.length-1;
+    return {
+      id: 't'+i,
+      name: t.name, subject: t.subject, grade: t.grade, section: t.section,
+      actual: t.actual, expected: t.expected,
+      status: classify(t.actual, t.expected),
+      gap: t.actual[n]-t.expected[n],
+      isNewHire: !!t.isNewHire,
+      joined: t.joined || null,
+      gapSeries: t.actual.map(function(v,j){ return v - t.expected[j]; })
+    };
+  });
+
+  var grades = Array.from(new Set(teachers.map(function(t){return t.grade;}))).sort(function(a,b){return a-b;});
+  var subjects = ['Math','Science','English','Social Studies'];
+
+  var legend = document.getElementById('legend');
+  Object.keys(STATUS_META).forEach(function(k){
+    var m = STATUS_META[k];
+    legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:'+m.color+'"></span>'+m.label+'</div>';
+  });
+  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:#eceef1"></span>No section taught</div>';
+  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:linear-gradient(90deg,#2f9e5a,#d98324)"></span>Mixed &mdash; sections disagree</div>';
+
+  function teachersFor(grade, subject){
+    return teachers.filter(function(t){ return t.grade===grade && t.subject===subject; });
+  }
+  function worstStatus(list){
+    return list.reduce(function(worst, t){
+      return STATUS_META[t.status].rank > STATUS_META[worst.status].rank ? t : worst;
+    }, list[0]).status;
+  }
+  function isMixed(list){
+    return Array.from(new Set(list.map(function(t){ return t.status; }))).length > 1;
+  }
+  function splitBackground(list){
+    var n = list.length;
+    var stops = list.map(function(t,i){
+      var color = STATUS_META[t.status].color;
+      var start = (i/n*100).toFixed(1), end = ((i+1)/n*100).toFixed(1);
+      return color+' '+start+'%, '+color+' '+end+'%';
+    }).join(', ');
+    return 'linear-gradient(90deg, '+stops+')';
+  }
+
+  var grid = document.getElementById('grid');
+  var html = '<tr><th></th>';
+  subjects.forEach(function(s){ html += '<th>'+s+'</th>'; });
+  html += '</tr>';
+  grades.forEach(function(g){
+    html += '<tr><td class="rowlabel">Grade '+g+'</td>';
+    subjects.forEach(function(s){
+      var list = teachersFor(g,s);
+      if(!list.length){
+        html += '<td class="cell na">&mdash;</td>';
+      } else if(isMixed(list)){
+        html += '<td class="cell mixed" style="background:'+splitBackground(list)+'" data-grade="'+g+'" data-subject="'+s+'">'+
+          '<span class="mixed-tag">Mixed</span><div class="cell-count">'+list.length+' teachers</div></td>';
+      } else {
+        var meta = STATUS_META[worstStatus(list)];
+        html += '<td class="cell" style="background:'+meta.color+'" data-grade="'+g+'" data-subject="'+s+'">'+
+          meta.label+'<div class="cell-count">'+list.length+' teacher'+(list.length>1?'s':'')+'</div></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  grid.innerHTML = html;
+
+  function lineChartSVG(datasets, months, w, h){
+    var pad = {l:72,r:12,t:14,b:20};
+    var allVals = [].concat.apply([], datasets.map(function(d){ return d.values; }));
+    var max = Math.max.apply(null, allVals), min = Math.min.apply(null, allVals);
+    min = Math.floor(min/5)*5 - 2; max = Math.ceil(max/5)*5 + 2;
+    var innerW = w - pad.l - pad.r, innerH = h - pad.t - pad.b;
+    function x(i){ return pad.l + i/(months.length-1)*innerW; }
+    function y(v){ return pad.t + innerH - ((v-min)/(max-min))*innerH; }
+    var svg = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
+    svg += drawAxisLabels(min, max, y, w, pad);
+    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#999">'+m+'</text>'; });
+    datasets.forEach(function(d){
+      var pts = d.values.map(function(v,i){ return x(i).toFixed(1)+','+y(v).toFixed(1); }).join(' ');
+      svg += '<polyline points="'+pts+'" fill="none" stroke="'+d.color+'" stroke-width="'+(d.muted?1.6:2.4)+'" '+
+        (d.dashed?'stroke-dasharray="5,4"':'')+' opacity="'+(d.muted?0.45:1)+'"/>';
+      d.values.forEach(function(v,i){ svg += '<circle cx="'+x(i)+'" cy="'+y(v)+'" r="'+(d.muted?1.8:2.6)+'" fill="'+d.color+'" opacity="'+(d.muted?0.45:1)+'"/>'; });
+    });
+    svg += '</svg>';
+    return svg;
+  }
+
+  function showTeacherTrajectory(id, list){
+    var t = teachers.filter(function(x){ return x.id===id; })[0];
+    var meta = STATUS_META[t.status];
+    var others = list.filter(function(x){ return x.id!==id; });
+
+    var box = document.getElementById('trajectoryPanel');
+    var html = '<div class="panel-title">'+t.name+' (Sec '+t.section+') &mdash; Actual vs Expected</div>'+
+      lineChartSVG([
+        {color: meta.color, values: t.actual},
+        {color: '#999', dashed:true, values: t.expected}
+      ], MONTHS, 440, 170)+
+      '<div class="legend-row"><span><span style="color:'+meta.color+'">&#9632;</span> '+t.name+'</span><span><span style="color:#999">&#9632;</span> Expected (dashed)</span></div>';
+
+    if(others.length){
+      var datasets = list.map(function(x){
+        return { color: STATUS_META[x.status].color, values: x.actual, muted: x.id!==id };
+      });
+      datasets.push({ color:'#bbb', dashed:true, values: t.expected, muted:true });
+      html += '<div class="panel-title" style="margin-top:12px;">All sections in Grade '+t.grade+' '+t.subject+' (this one highlighted)</div>'+
+        lineChartSVG(datasets, MONTHS, 440, 170)+
+        '<div class="legend-row">'+list.map(function(x){
+          return '<span><span style="color:'+STATUS_META[x.status].color+'">&#9632;</span> '+x.name+' &middot; gap '+x.gap+'</span>';
+        }).join('')+'</div>';
+    }
+    box.innerHTML = html;
+  }
+
+  // --- New-Teacher Ramp Curve ---
+  // Typical ramp benchmark: how far behind pace a "typical" new hire runs, month by month,
+  // and how much that typically varies (band), based on historical new-hire cohorts.
+  var RAMP_MONTHS = ['M1','M2','M3','M4','M5','M6'];
+  var TYPICAL_RAMP = [-8,-7,-5,-3,-1,0];
+  var RAMP_BAND = { upper: TYPICAL_RAMP.map(function(v){ return v+3; }), lower: TYPICAL_RAMP.map(function(v){ return v-3; }) };
+  var REACH_PACE_THRESHOLD = -3;
+
+  function reachMonth(series){
+    // "Reached pace" means crossing the threshold and staying at/above it —
+    // a month that merely touches the line before falling away doesn't count.
+    for(var i=0;i<series.length;i++){
+      if(series[i] >= REACH_PACE_THRESHOLD){
+        var held = true;
+        for(var j=i;j<series.length;j++){ if(series[j] < REACH_PACE_THRESHOLD){ held = false; break; } }
+        if(held) return i+1;
+      }
+    }
+    return null;
+  }
+  var typicalReach = reachMonth(TYPICAL_RAMP);
+
+  function rampChartSVG(lines, band, months, w, h){
+    var pad = {l:72,r:12,t:14,b:20};
+    var allVals = [].concat.apply([], lines.map(function(d){ return d.values; })).concat(band.upper).concat(band.lower);
+    var max = Math.max.apply(null, allVals), min = Math.min.apply(null, allVals);
+    min = Math.floor(min/5)*5 - 2; max = Math.ceil(max/5)*5 + 2;
+    var innerW = w - pad.l - pad.r, innerH = h - pad.t - pad.b;
+    function x(i){ return pad.l + i/(months.length-1)*innerW; }
+    function y(v){ return pad.t + innerH - ((v-min)/(max-min))*innerH; }
+    var svg = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
+    svg += drawAxisLabels(min, max, y, w, pad);
+    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#999">'+m+'</text>'; });
+    // typical-range band
+    var upperPts = band.upper.map(function(v,i){ return x(i)+','+y(v); });
+    var lowerPts = band.lower.map(function(v,i){ return x(i)+','+y(v); }).reverse();
+    svg += '<polygon points="'+upperPts.concat(lowerPts).join(' ')+'" fill="#8a8f99" opacity="0.12"/>';
+    lines.forEach(function(d){
+      var pts = d.values.map(function(v,i){ return x(i).toFixed(1)+','+y(v).toFixed(1); }).join(' ');
+      svg += '<polyline points="'+pts+'" fill="none" stroke="'+d.color+'" stroke-width="'+(d.muted?1.6:2.4)+'" '+
+        (d.dashed?'stroke-dasharray="5,4"':'')+' opacity="'+(d.muted?0.4:1)+'"/>';
+      d.values.forEach(function(v,i){ svg += '<circle cx="'+x(i)+'" cy="'+y(v)+'" r="'+(d.muted?1.7:2.5)+'" fill="'+d.color+'" opacity="'+(d.muted?0.4:1)+'"/>'; });
+    });
+    svg += '</svg>';
+    return svg;
+  }
+
+  var newHires = teachers.filter(function(t){ return t.isNewHire; });
+
+  function renderRamp(focusId){
+    var chips = document.getElementById('rampChips');
+    chips.innerHTML = '<div class="chip all'+(!focusId?' active':'')+'" data-id="all">All new hires</div>' +
+      newHires.map(function(t){
+        return '<div class="chip'+(focusId===t.id?' active':'')+'" data-id="'+t.id+'" style="'+(focusId===t.id?('background:'+STATUS_META[t.status].color+';'):'')+'">'+t.name+'</div>';
+      }).join('');
+    chips.querySelectorAll('.chip').forEach(function(c){
+      c.onclick = function(){ renderRamp(c.getAttribute('data-id')==='all' ? null : c.getAttribute('data-id')); };
+    });
+
+    var lines = newHires.map(function(t){
+      return { color: STATUS_META[t.status].color, values: t.gapSeries, muted: !!focusId && focusId!==t.id };
+    });
+    lines.push({ color:'#555', dashed:true, values: TYPICAL_RAMP, muted:false });
+
+    document.getElementById('rampChartBox').innerHTML =
+      rampChartSVG(lines, RAMP_BAND, RAMP_MONTHS, 620, 210) +
+      '<div class="legend-row" style="margin-top:6px;">'+
+      '<span><span style="color:#555">&#9632;</span> Typical ramp (reaches pace by M'+typicalReach+')</span>'+
+      '<span><span style="color:#8a8f99">&#9632;</span> Typical range band</span>'+
+      '</div>';
+
+    var summary = document.getElementById('rampSummary');
+    summary.innerHTML = newHires.map(function(t){
+      var m = STATUS_META[t.status];
+      var rm = reachMonth(t.gapSeries);
+      var verdict, vcolor;
+      var n = t.gapSeries.length-1;
+      var startedOnPace = t.gapSeries[0] >= REACH_PACE_THRESHOLD;
+      var endingGap = t.gapSeries[n];
+      if(rm && rm <= typicalReach){ verdict = 'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')'; vcolor='#2f9e5a'; }
+      else if(rm){ verdict = 'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')'; vcolor='#d98324'; }
+      else if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ verdict = 'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping'; vcolor='#c0392b'; }
+      else { verdict = 'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp'; vcolor='#c0392b'; }
+      return '<div class="ramp-card" style="background:'+m.bg+';">'+
+        '<div class="rname">'+t.name+'</div>'+
+        '<div style="font-size:11px;color:#777;margin-bottom:4px;">'+t.subject+' &middot; Grade '+t.grade+' &middot; joined '+t.joined+'</div>'+
+        '<div class="rstat" style="color:'+vcolor+';font-weight:600;">'+verdict+'</div></div>';
+    }).join('');
+  }
+  renderRamp(null);
+
+  document.querySelectorAll('td.cell:not(.na)').forEach(function(td){
+    td.onclick = function(){
+      var g = parseInt(td.getAttribute('data-grade'));
+      var s = td.getAttribute('data-subject');
+      var list = teachersFor(g,s);
+      var det = document.getElementById('detail');
+      det.style.display = 'block';
+
+      var rows = list.map(function(t){
+        var m = STATUS_META[t.status];
+        return '<div class="trow" data-id="'+t.id+'"><span>'+t.name+' <span style="color:#999;font-weight:400;">(Sec '+t.section+')</span></span>'+
+          '<span><span class="badge" style="background:'+m.bg+';color:'+m.color+';">'+m.label+'</span> '+
+          '<span style="color:'+(t.gap<0?'#c0392b':'#2f9e5a')+';margin-left:8px;font-weight:600;">'+t.gap+' pts</span></span></div>';
+      }).join('');
+
+      var note = '';
+      if(isMixed(list)){
+        note = '<div style="font-size:11.5px;color:#a05a00;margin-top:8px;background:#fdf1e0;padding:8px 10px;border-radius:8px;">'+
+          'These sections disagree &mdash; same grade, same subject, different outcomes. That points to a teacher-specific gap, not a subject-wide problem.</div>';
+      } else if(list.length>1){
+        note = '<div style="font-size:11.5px;color:#888;margin-top:8px;">Both sections agree &mdash; likely a subject/grade-wide pattern rather than one teacher.</div>';
+      }
+
+      det.innerHTML = '<h3>Grade '+g+' &middot; '+s+'</h3>' + rows + note +
+        '<div style="font-size:11px;color:#aaa;margin-top:8px;">Click a teacher&rsquo;s name above to see their trajectory.</div>'+
+        '<div id="trajectoryPanel"></div>';
+
+      det.querySelectorAll('.trow').forEach(function(row){
+        row.onclick = function(){ showTeacherTrajectory(row.getAttribute('data-id'), list); };
+      });
+    };
+  });
+
+  // --- Detailed brochure report ---
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function verdictFor(t){
+    var rm = reachMonth(t.gapSeries);
+    var n = t.gapSeries.length-1;
+    var startedOnPace = t.gapSeries[0] >= REACH_PACE_THRESHOLD;
+    var endingGap = t.gapSeries[n];
+    if(rm && rm <= typicalReach){ return { text:'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')', color:'#2f9e5a' }; }
+    if(rm){ return { text:'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')', color:'#d98324' }; }
+    if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ return { text:'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping', color:'#c0392b' }; }
+    return { text:'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp', color:'#c0392b' };
+  }
+
+  function brochureCellCard(g, s){
+    var list = teachersFor(g, s);
+    var mixed = isMixed(list);
+    var meta = STATUS_META[worstStatus(list)];
+    var rows = list.map(function(t){
+      var m = STATUS_META[t.status];
+      return '<div class="b-trow">'+
+        '<span class="b-tname">'+escapeHtml(t.name)+' <span class="b-tsec">(Sec '+escapeHtml(t.section)+')</span></span>'+
+        '<span class="b-badge" style="background:'+m.bg+';color:'+m.color+';">'+m.label+'</span>'+
+        '<span class="b-gap" style="color:'+(t.gap<0?'#c0392b':'#2f9e5a')+';">'+t.gap+' pts</span>'+
+        '</div>';
+    }).join('');
+    var note = mixed
+      ? '<p class="b-note mixed">These sections disagree — same grade, same subject, different outcomes. Points to a teacher-specific gap, not a subject-wide problem.</p>'
+      : (list.length>1 ? '<p class="b-note">Both sections agree — likely a subject/grade-wide pattern rather than one teacher.</p>' : '');
+    return '<article class="b-card" style="border-top-color:'+meta.color+';">'+
+      '<div class="b-card-head"><span class="b-combo">Grade '+g+' · '+escapeHtml(s)+'</span>'+
+      '<span class="b-badge" style="background:'+meta.bg+';color:'+meta.color+';">'+meta.label+(mixed?' (mixed)':'')+'</span></div>'+
+      rows + note + '</article>';
+  }
+
+  function brochureHireCard(t){
+    var v = verdictFor(t);
+    var m = STATUS_META[t.status];
+    return '<article class="b-card" style="border-top-color:'+m.color+';">'+
+      '<div class="b-card-head"><span class="b-combo">'+escapeHtml(t.name)+'</span>'+
+      '<span class="b-badge" style="background:'+m.bg+';color:'+m.color+';">'+m.label+'</span></div>'+
+      '<p class="b-detail">'+escapeHtml(t.subject)+' · Grade '+t.grade+' · joined '+escapeHtml(t.joined)+'</p>'+
+      '<p class="b-verdict" style="color:'+v.color+';">'+escapeHtml(v.text)+'</p>'+
+      '</article>';
+  }
+
+  function buildBrochureHtml(){
+    var statusCounts = { 'on-track':0, 'improving':0, 'declining':0, 'early-support':0 };
+    teachers.forEach(function(t){ statusCounts[t.status]++; });
+
+    var filledCells = [], naCount = 0, mixedCount = 0;
+    grades.forEach(function(g){
+      subjects.forEach(function(s){
+        var list = teachersFor(g, s);
+        if(!list.length){ naCount++; }
+        else { filledCells.push([g,s]); if(isMixed(list)) mixedCount++; }
+      });
+    });
+    var totalCells = grades.length * subjects.length;
+
+    var execSummary = 'Across '+totalCells+' grade × subject combinations, '+filledCells.length+' are currently taught ('+naCount+' have no section this term). '+
+      'Of the '+teachers.length+' teacher-sections tracked: '+statusCounts['on-track']+' on track, '+statusCounts['improving']+' improving, '+
+      statusCounts['declining']+' declining, and '+statusCounts['early-support']+' in early support. '+
+      mixedCount+' grade × subject cell'+(mixedCount===1?'':'s')+' show sections disagreeing with each other — same grade and subject, different outcomes, which points to a teacher-specific gap rather than a subject-wide one. '+
+      'Separately, '+newHires.length+' new hires are being tracked against a typical ramp curve that reaches pace by month '+typicalReach+'.';
+
+    var cellCardsHtml = filledCells.map(function(gs){ return brochureCellCard(gs[0], gs[1]); }).join('');
+    var hireCardsHtml = newHires.map(brochureHireCard).join('');
+
+    return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+
+      '<title>School Delivery Heatmap — Detailed Report</title>'+
+      '<style>'+
+      ':root{--ink:#1f2430;--slate:#666;--rule:#e6e8ec;--card:#fff;--paper:#f4f5f7;}'+
+      '*{box-sizing:border-box;}'+
+      'body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}'+
+      '.b-wrap{max-width:860px;margin:0 auto;padding:0 24px 60px;}'+
+      'header.b-head{background:var(--ink);color:#fff;padding:32px 24px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}'+
+      'header.b-head h1{font-size:21px;margin:0;}'+
+      'header.b-head .b-sub{font-size:11.5px;color:#aab;letter-spacing:.04em;margin-top:4px;}'+
+      '.b-print{font-size:11px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:8px 16px;cursor:pointer;}'+
+      '.b-print:hover{background:rgba(255,255,255,.12);}'+
+      '.b-intro{text-align:center;margin-bottom:36px;}'+
+      '.b-intro h2{font-size:24px;margin:0 0 8px;}'+
+      '.b-intro p{font-size:14px;color:var(--slate);max-width:600px;margin:0 auto;line-height:1.6;}'+
+      '.b-exec-summary{background:var(--card);border-left:3px solid var(--ink);border-radius:0 10px 10px 0;padding:16px 20px;font-size:13.5px;line-height:1.65;margin:0 0 8px;box-shadow:0 1px 2px rgba(0,0,0,.04);}'+
+      '.b-section-title{margin:40px 0 4px;font-size:18px;}'+
+      '.b-section-desc{font-size:13px;color:var(--slate);line-height:1.6;margin:0 0 16px;max-width:600px;}'+
+      '.b-card{background:var(--card);border-radius:12px;border-top:4px solid var(--rule);box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);padding:18px 20px 16px;margin-bottom:14px;}'+
+      '.b-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}'+
+      '.b-combo{font-size:13.5px;font-weight:700;}'+
+      '.b-badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:20px;}'+
+      '.b-trow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-top:1px solid var(--rule);font-size:12.5px;}'+
+      '.b-trow:first-of-type{border-top:none;}'+
+      '.b-tsec{color:#999;font-weight:400;}'+
+      '.b-gap{font-weight:700;font-size:12px;}'+
+      '.b-note{font-size:11.5px;color:#888;margin:8px 0 0;}'+
+      '.b-note.mixed{color:#a05a00;background:#fdf1e0;padding:8px 10px;border-radius:8px;}'+
+      '.b-detail{font-size:12.5px;color:#777;margin:0 0 8px;}'+
+      '.b-verdict{font-size:12.5px;font-weight:600;margin:0;}'+
+      '.b-closing{margin-top:40px;padding-top:20px;border-top:1px solid var(--rule);text-align:center;}'+
+      '.b-closing p{font-size:13px;color:var(--slate);max-width:540px;margin:0 auto;line-height:1.6;}'+
+      'footer.b-footer{text-align:center;font-size:10.5px;color:var(--slate);margin-top:32px;}'+
+      '@media print{.b-print{display:none;}}'+
+      '</style></head><body>'+
+      '<header class="b-head"><div><h1>School Delivery Heatmap</h1><div class="b-sub">DETAILED REPORT · TEACHER DELIVERY STATUS</div></div>'+
+      '<button class="b-print" onclick="window.print()">Print / Save as PDF</button></header>'+
+      '<div class="b-wrap">'+
+      '<div class="b-intro"><h2>How is delivery going, teacher by teacher?</h2>'+
+      '<p>Every taught grade × subject combination, in full — which teachers are on pace, which need support, and how each new hire is ramping against a typical curve.</p></div>'+
+      '<p class="b-exec-summary">'+escapeHtml(execSummary)+'</p>'+
+      '<h2 class="b-section-title">Delivery Status by Grade &amp; Subject</h2>'+
+      '<p class="b-section-desc">Every cell that has at least one section taught this term, with each teacher\'s status and gap to expected pace.</p>'+
+      cellCardsHtml+
+      '<h2 class="b-section-title">New-Teacher Ramp</h2>'+
+      '<p class="b-section-desc">How each new hire is tracking against a typical ramp curve that reaches pace by month '+typicalReach+'.</p>'+
+      hireCardsHtml+
+      '<div class="b-closing"><p>This report was generated from the same underlying data shown on the heatmap dashboard — the grid, the teacher trajectories, and the ramp curves all trace back to the '+teachers.length+' teacher-sections and '+newHires.length+' new hires detailed above.</p></div>'+
+      '<footer class="b-footer">Sample data · School Delivery Heatmap · Dronalytics School Pretotype</footer>'+
+      '</div></body></html>';
+  }
+
+  document.getElementById('dlDocHeatmap').addEventListener('click', function(){
+    var html = buildBrochureHtml();
+    var blobUrl = URL.createObjectURL(new Blob([html], {type:'text/html'}));
+    window.open(blobUrl, '_blank');
+  });
+})();
+</script>
+</body>
+</html>

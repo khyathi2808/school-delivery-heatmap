@@ -487,7 +487,10 @@
       '.b-exec-summary{background:var(--card);border-left:3px solid var(--ink);border-radius:0 10px 10px 0;padding:16px 20px;font-size:13.5px;line-height:1.65;margin:0 0 8px;box-shadow:0 1px 2px rgba(0,0,0,.04);}'+
       '.b-section-title{margin:40px 0 4px;font-size:18px;}'+
       '.b-section-desc{font-size:13px;color:var(--slate);line-height:1.6;margin:0 0 16px;max-width:600px;}'+
+      '.b-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}'+
+      '@media (max-width:640px){.b-grid{grid-template-columns:1fr;}}'+
       '.b-card{background:var(--card);border-radius:12px;border-top:4px solid var(--rule);box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.05);padding:18px 20px 16px;margin-bottom:14px;}'+
+      '.b-grid .b-card{margin-bottom:0;}'+
       '.b-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}'+
       '.b-combo{font-size:13.5px;font-weight:700;}'+
       '.b-badge{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 9px;border-radius:20px;}'+
@@ -512,10 +515,10 @@
       '<p class="b-exec-summary">'+escapeHtml(execSummary)+'</p>'+
       '<h2 class="b-section-title">Delivery Status by Grade &amp; Subject</h2>'+
       '<p class="b-section-desc">Every cell that has at least one section taught this term, with each teacher\'s status and gap to expected pace.</p>'+
-      cellCardsHtml+
+      '<div class="b-grid">'+cellCardsHtml+'</div>'+
       '<h2 class="b-section-title">New-Teacher Ramp</h2>'+
       '<p class="b-section-desc">How each new hire is tracking against a typical ramp curve that reaches pace by month '+typicalReach+'.</p>'+
-      hireCardsHtml+
+      '<div class="b-grid">'+hireCardsHtml+'</div>'+
       '<div class="b-closing"><p>This report was generated from the same underlying data shown on the heatmap dashboard — the grid, the teacher trajectories, and the ramp curves all trace back to the '+teachers.length+' teacher-sections and '+newHires.length+' new hires detailed above.</p></div>'+
       '<footer class="b-footer">Sample data · School Delivery Heatmap · Dronalytics School Pretotype</footer>'+
       '</div></body></html>';

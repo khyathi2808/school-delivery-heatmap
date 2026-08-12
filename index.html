@@ -18,7 +18,7 @@
 
   /* ===== DRONA BRAND (per DRONA-BRAND-SPEC.md) ===== */
   :root{
-    --drona-felt-0:#071A11; --drona-felt-1:#0A2316; --drona-felt-2:#0E2C1D;
+    --drona-felt-0:#071A11; --drona-felt-1:#0F1F0F; --drona-felt-2:#0F1F0F;
     --drona-gold:#C9A84C; --drona-gold-bright:#E0C673;
     --drona-text:#ECE8DC; --drona-text-secondary:#A6BCAE;
     --drona-line-gold:rgba(201,168,76,.22);
@@ -26,17 +26,17 @@
     --drona-font-sans:'IBM Plex Sans',system-ui,sans-serif;
   }
   .drona-nav{background:var(--drona-felt-0);padding:16px 28px;}
-  .drona-nav-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;}
+  .drona-nav-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:10px;}
 
   .drona-hero{position:relative;overflow:hidden;background:var(--drona-felt-1);color:var(--drona-text);padding:80px 24px;text-align:center;font-variant-numeric:tabular-nums;}
-  .drona-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:640px;height:640px;fill:var(--drona-gold);opacity:.05;pointer-events:none;}
+  .drona-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:auto;opacity:.10;pointer-events:none;}
   .drona-hero-inner{position:relative;max-width:600px;margin:0 auto;}
   .drona-hero h1{font-family:var(--drona-font-serif);font-weight:700;font-size:clamp(44px,7vw,72px);line-height:1.05;margin:0 0 18px;color:var(--drona-text);}
   .drona-hero h1 .dot{color:var(--drona-gold);}
   .drona-hero-sub{font-family:var(--drona-font-serif);font-style:italic;font-size:clamp(15px,2vw,18px);line-height:1.5;color:var(--drona-text-secondary);margin:0 0 30px;}
   .drona-eyebrow{font-family:'IBM Plex Mono',monospace;font-weight:500;letter-spacing:.28em;font-size:10.5px;text-transform:uppercase;color:var(--drona-gold);}
 
-  .drona-explainer{background:var(--drona-felt-2);color:var(--drona-text);padding:64px 24px;text-align:center;font-variant-numeric:tabular-nums;}
+  .drona-explainer{background:var(--drona-felt-1);color:var(--drona-text);padding:64px 24px;text-align:center;font-variant-numeric:tabular-nums;}
   .drona-explainer-inner{max-width:640px;margin:0 auto;}
   .drona-explainer h2{font-family:var(--drona-font-serif);font-weight:600;font-size:clamp(22px,3.2vw,30px);line-height:1.28;margin:14px 0 16px;color:var(--drona-text);}
   .drona-explainer h2 em{font-style:italic;color:var(--drona-gold-bright);font-weight:600;}
@@ -104,31 +104,18 @@
 <body>
 <nav class="drona-nav">
   <div class="drona-nav-inner">
-    <div style="display:flex;flex-direction:column;gap:2px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <svg viewBox="207 117 386 386" width="24" height="24" fill="var(--drona-gold)" style="display:block;flex-shrink:0">
-          <path d="M218.8,130.6c0,0,39.5,6.5,46.3,65.1c0,40.6,0,78.4,0,124.3c0,11,0,78.1,0,95.8l0,0l0,1.1c0,0.3,0,0.7,0,1l0,0l0,17.4c95.2-30.4,151.5,45.9,151.5,45.9s-101.3-32.9-151.5,19.9c0-20.6,0-49.3,0-73c-4.1-3.6-8.6-6.8-13.6-9.3c-38.6-19.8-84.6-1.9-97.3,38.8c-1.9,6.2-2.8,12.5-2.9,18.7c-3.7-53.7,27.6-98.3,71.3-104c14.9-2,29.1,0.7,42.1,7c0.2-49.4,0.2-98.7,0.1-148.1C264.7,140.4,218.8,130.6,218.8,130.6z"/>
-          <path d="M577.8,272.1c0,0-6.5,39.5-65.1,46.3c-40.6,0-78.4,0-124.3,0c-11,0-78.1,0-95.8,0l0,0l-1.1,0c-0.3,0-0.7,0-1,0l0,0l-17.4,0c30.4,95.2-45.9,151.5-45.9,151.5s32.9-101.3-19.9-151.5c20.6,0,49.3,0,73,0c3.6-4.1,6.8-8.6,9.3-13.6c19.8-38.6,1.9-84.6-38.8-97.3c-6.2-1.9-12.5-2.8-18.7-2.9c53.7-3.7,98.3,27.6,104,71.3c2,14.9-0.7,29.1-7,42.1c49.4,0.2,98.7,0.2,148.1,0.1C568,318,577.8,272.1,577.8,272.1z"/>
-          <path d="M377.6,431.6c0,0,6.5,39.5,65.1,46.3c40.6,0,78.4,0,124.3,0c11,0,78.1,0,95.8,0l0,0l1.1,0c0.3,0,0.7,0,1,0l0,0l17.4,0c-30.4-95.2,45.9-151.5,45.9-151.5s-32.9,101.3,19.9,151.5c-20.6,0-49.3,0-73,0c-3.6,4.1-6.8,8.6-9.3,13.6c-19.8,38.6-1.9,84.6,38.8,97.3c6.2,1.9,12.5,2.8,18.7,2.9c-53.7,3.7-98.3-27.6-104-71.3c-2-14.9,0.7-29.1,7-42.1c-49.4-0.2-98.7-0.2-148.1-0.1C387.4,385.8,377.6,431.6,377.6,431.6z"/>
-          <path d="M422.6,488.9c0,0-39.5-6.5-46.3-65.1c0-40.6,0-78.4,0-124.3c0-11,0-78.1,0-95.8l0,0l0-1.1c0-0.3,0-0.7,0-1l0,0l0-17.4c-95.2,30.4-151.5-45.9-151.5-45.9s101.3,32.9,151.5-19.9c0,20.6,0,49.3,0,73c4.1,3.6,8.6,6.8,13.6,9.3c38.6,19.8,84.6,1.9,97.3-38.8c1.9-6.2,2.8-12.5,2.9-18.7c3.7,53.7-27.6,98.3-71.3,104c-14.9,2-29.1-0.7-42.1-7c-0.2,49.4-0.2,98.7-0.1,148.1C376.8,479.1,422.6,488.9,422.6,488.9z"/>
-        </svg>
-        <span style="font-family:var(--drona-font-serif);font-weight:600;font-size:13px;color:var(--drona-text)">Drona</span>
-        <span style="font-family:var(--drona-font-serif);font-weight:600;font-size:13px;color:var(--drona-gold);margin-left:-6px">.</span>
-      </div>
-      <span style="display:block;width:100%;font-family:var(--drona-font-sans);font-weight:400;font-size:5px;text-transform:uppercase;color:var(--drona-text-secondary);text-align:justify;text-align-last:justify;line-height:1;margin-top:1px">An Altumind Venture</span>
+    <img src="dronafy-mark.png" alt="Dronafy" style="width:24px;height:24px;flex-shrink:0;display:block;">
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <span style="font-family:var(--drona-font-serif);font-weight:600;font-size:14px;color:var(--drona-gold);line-height:1;">Dronafy</span>
+      <span style="font-family:var(--drona-font-sans);font-weight:400;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--drona-text-secondary);">An Altumind Venture</span>
     </div>
   </div>
 </nav>
 
 <section class="drona-hero">
-  <svg class="drona-watermark" viewBox="207 117 386 386" aria-hidden="true">
-    <path d="M218.8,130.6c0,0,39.5,6.5,46.3,65.1c0,40.6,0,78.4,0,124.3c0,11,0,78.1,0,95.8l0,0l0,1.1c0,0.3,0,0.7,0,1l0,0l0,17.4c95.2-30.4,151.5,45.9,151.5,45.9s-101.3-32.9-151.5,19.9c0-20.6,0-49.3,0-73c-4.1-3.6-8.6-6.8-13.6-9.3c-38.6-19.8-84.6-1.9-97.3,38.8c-1.9,6.2-2.8,12.5-2.9,18.7c-3.7-53.7,27.6-98.3,71.3-104c14.9-2,29.1,0.7,42.1,7c0.2-49.4,0.2-98.7,0.1-148.1C264.7,140.4,218.8,130.6,218.8,130.6z"/>
-    <path d="M577.8,272.1c0,0-6.5,39.5-65.1,46.3c-40.6,0-78.4,0-124.3,0c-11,0-78.1,0-95.8,0l0,0l-1.1,0c-0.3,0-0.7,0-1,0l0,0l-17.4,0c30.4,95.2-45.9,151.5-45.9,151.5s32.9-101.3-19.9-151.5c20.6,0,49.3,0,73,0c3.6-4.1,6.8-8.6,9.3-13.6c19.8-38.6,1.9-84.6-38.8-97.3c-6.2-1.9-12.5-2.8-18.7-2.9c53.7-3.7,98.3,27.6,104,71.3c2,14.9-0.7,29.1-7,42.1c49.4,0.2,98.7,0.2,148.1,0.1C568,318,577.8,272.1,577.8,272.1z"/>
-    <path d="M377.6,431.6c0,0,6.5,39.5,65.1,46.3c40.6,0,78.4,0,124.3,0c11,0,78.1,0,95.8,0l0,0l1.1,0c0.3,0,0.7,0,1,0l0,0l17.4,0c-30.4-95.2,45.9-151.5,45.9-151.5s-32.9,101.3,19.9,151.5c-20.6,0-49.3,0-73,0c-3.6,4.1-6.8,8.6-9.3,13.6c-19.8,38.6-1.9,84.6,38.8,97.3c6.2,1.9,12.5,2.8,18.7,2.9c-53.7,3.7-98.3-27.6-104-71.3c-2-14.9,0.7-29.1,7-42.1c-49.4-0.2-98.7-0.2-148.1-0.1C387.4,385.8,377.6,431.6,377.6,431.6z"/>
-    <path d="M422.6,488.9c0,0-39.5-6.5-46.3-65.1c0-40.6,0-78.4,0-124.3c0-11,0-78.1,0-95.8l0,0l0-1.1c0-0.3,0-0.7,0-1l0,0l0-17.4c-95.2,30.4-151.5-45.9-151.5-45.9s101.3,32.9,151.5-19.9c0,20.6,0,49.3,0,73c4.1,3.6,8.6,6.8,13.6,9.3c38.6,19.8,84.6,1.9,97.3-38.8c1.9-6.2,2.8-12.5,2.9-18.7c3.7,53.7-27.6,98.3-71.3,104c-14.9,2-29.1-0.7-42.1-7c-0.2,49.4-0.2,98.7-0.1,148.1C376.8,479.1,422.6,488.9,422.6,488.9z"/>
-  </svg>
+  <img class="drona-watermark" src="dronafy-mark.png" alt="" aria-hidden="true">
   <div class="drona-hero-inner">
-    <h1>Drona<span class="dot">.</span></h1>
+    <h1>Dronafy</h1>
     <p class="drona-hero-sub">Built on the belief that great teaching begins long before a student enters a classroom.</p>
     <div class="drona-eyebrow">PREPARE · UNDERSTAND · DELIVER</div>
   </div>

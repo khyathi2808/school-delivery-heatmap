@@ -118,22 +118,95 @@
   .drona-modal-status{margin:12px 0 0;font-size:12.5px;color:var(--drona-text-secondary);min-height:16px;}
   .drona-modal-status.error{color:#E08585;}
   .drona-modal-status.success{color:var(--drona-gold-bright);}
+
+  /* -- Gate modal: two ways to unlock the report, shown side by side -- */
+  .drona-modal.wide{max-width:900px;}
+  .drona-gate-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0 28px;}
+  @media (max-width:720px){.drona-gate-grid{grid-template-columns:1fr;}}
+  .drona-gate-col{display:flex;flex-direction:column;min-width:0;}
+  .drona-gate-col-title{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--drona-gold);margin-bottom:5px;}
+  .drona-gate-col-desc{font-size:12px;color:var(--drona-text-secondary);margin:0 0 16px;line-height:1.5;}
+  .drona-gate-divider{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .drona-gate-divider .line{width:1px;flex:1;min-height:24px;background:var(--drona-line-gold);}
+  .drona-gate-divider .or-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.14em;color:var(--drona-text-secondary);}
+  @media (max-width:720px){
+    .drona-gate-divider{flex-direction:row;padding:8px 0 18px;}
+    .drona-gate-divider .line{height:1px;width:auto;flex:1;min-height:0;}
+  }
+  .drona-survey-q{margin-bottom:15px;}
+  .drona-survey-q .q-label{display:block;font-size:12.5px;color:var(--drona-text);margin-bottom:8px;line-height:1.42;font-weight:500;}
+  .drona-survey-opts{display:flex;flex-direction:row;flex-wrap:wrap;gap:8px;}
+  .drona-survey-opt{
+    position:relative;display:inline-flex;align-items:center;flex:0 0 auto;white-space:nowrap;
+    background:rgba(255,255,255,.03);border:1px solid var(--drona-line-gold);border-radius:20px;
+    padding:6px 14px 6px 26px;font-family:inherit;font-size:12px;line-height:1.3;color:var(--drona-text-secondary);cursor:pointer;
+    transition:background .15s ease,border-color .15s ease,color .15s ease;
+  }
+  .drona-survey-opt::before{content:"";position:absolute;left:10px;top:50%;transform:translateY(-50%);width:11px;height:11px;border-radius:50%;border:1.5px solid var(--drona-line-gold);box-sizing:border-box;}
+  .drona-survey-opt:hover{border-color:var(--drona-gold);}
+  .drona-survey-opt.selected{background:rgba(201,168,76,.16);border-color:var(--drona-gold);color:var(--drona-text);}
+  .drona-survey-opt.selected::before{border-color:var(--drona-gold);background:var(--drona-gold);box-shadow:inset 0 0 0 2px var(--drona-felt-1);}
 </style>
 </head>
 <body>
 <div class="drona-modal-overlay" id="droneOverlay" hidden>
-  <div class="drona-modal" role="dialog" aria-modal="true" aria-labelledby="droneModalTitle">
+  <div class="drona-modal wide" role="dialog" aria-modal="true" aria-labelledby="droneModalTitle">
     <button type="button" class="drona-modal-close" id="droneModalClose" aria-label="Close">&times;</button>
     <div class="drona-eyebrow" style="margin-bottom:10px;">Before you download</div>
-    <h3 id="droneModalTitle" class="drona-modal-title">A few details, then the full report is yours.</h3>
-    <form id="droneForm" novalidate>
-      <label class="drona-field"><span>Name</span><input type="text" name="name" required></label>
-      <label class="drona-field"><span>School</span><input type="text" name="school" required></label>
-      <label class="drona-field"><span>Email</span><input type="email" name="email" required></label>
-      <p class="drona-field-hint">We'll send the report to this email.</p>
-      <button type="submit" class="drona-modal-submit" id="droneSubmitBtn">Get the report</button>
-      <p class="drona-modal-status" id="droneStatus"></p>
-    </form>
+    <h3 id="droneModalTitle" class="drona-modal-title">Two ways to unlock the report — pick whichever is easier.</h3>
+
+    <div class="drona-gate-grid">
+      <div class="drona-gate-col">
+        <div class="drona-gate-col-title">Option 1 · Your details</div>
+        <p class="drona-gate-col-desc">Tell us who you are and we'll send this report straight to your inbox.</p>
+        <form id="droneForm" novalidate>
+          <label class="drona-field"><span>Name</span><input type="text" name="name" required></label>
+          <label class="drona-field"><span>School</span><input type="text" name="school" required></label>
+          <label class="drona-field"><span>Email</span><input type="email" name="email" required></label>
+          <p class="drona-field-hint">We'll send the report to this email.</p>
+          <button type="submit" class="drona-modal-submit" id="droneSubmitBtn">Get the report</button>
+          <p class="drona-modal-status" id="droneStatus"></p>
+        </form>
+      </div>
+
+      <div class="drona-gate-divider" aria-hidden="true"><span class="line"></span><span class="or-label">OR</span><span class="line"></span></div>
+
+      <div class="drona-gate-col">
+        <div class="drona-gate-col-title">Option 2 · Quick survey</div>
+        <p class="drona-gate-col-desc">No contact info needed — answer these 3 questions and the report unlocks.</p>
+        <form id="droneSurveyForm" novalidate>
+          <div class="drona-survey-q" data-q="q1">
+            <span class="q-label">1. How would you primarily use this delivery heatmap?</span>
+            <div class="drona-survey-opts" role="radiogroup" aria-label="Question 1">
+              <button type="button" class="drona-survey-opt" data-value="Coaching — identify teachers who need support this week">Coaching</button>
+              <button type="button" class="drona-survey-opt" data-value="Monitoring — catch delivery gaps before they hit results">Monitoring</button>
+              <button type="button" class="drona-survey-opt" data-value="Onboarding — track how fast new hires are ramping up">Onboarding</button>
+              <button type="button" class="drona-survey-opt" data-value="Reporting — summarize delivery health to leadership">Reporting</button>
+            </div>
+          </div>
+          <div class="drona-survey-q" data-q="q2">
+            <span class="q-label">2. What's your biggest challenge with new-teacher ramp-up today?</span>
+            <div class="drona-survey-opts" role="radiogroup" aria-label="Question 2">
+              <button type="button" class="drona-survey-opt" data-value="Timing — we only notice gaps after results already dipped">Timing</button>
+              <button type="button" class="drona-survey-opt" data-value="Support — we don't know who needs coaching until it's late">Support</button>
+              <button type="button" class="drona-survey-opt" data-value="Consistency — delivery quality varies a lot across teachers">Consistency</button>
+              <button type="button" class="drona-survey-opt" data-value="Covered — we already track this well">Covered</button>
+            </div>
+          </div>
+          <div class="drona-survey-q" data-q="q3">
+            <span class="q-label">3. How do you currently spot a teacher who's falling behind pace?</span>
+            <div class="drona-survey-opts" role="radiogroup" aria-label="Question 3">
+              <button type="button" class="drona-survey-opt" data-value="Observations — periodic classroom walkthroughs">Observations</button>
+              <button type="button" class="drona-survey-opt" data-value="Complaints — parent or student feedback">Complaints</button>
+              <button type="button" class="drona-survey-opt" data-value="Results — end-of-term exam results">Results</button>
+              <button type="button" class="drona-survey-opt" data-value="Unclear — we don't have a consistent way yet">Unclear</button>
+            </div>
+          </div>
+          <button type="submit" class="drona-modal-submit" id="droneSurveySubmitBtn" disabled>Answer all 3 to unlock</button>
+          <p class="drona-modal-status" id="droneSurveyStatus"></p>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 <nav class="drona-nav">
@@ -937,6 +1010,98 @@
       droneStatus.textContent = 'Something went wrong generating the PDF. Please try again.';
       droneStatus.className = 'drona-modal-status error';
       droneSubmitBtn.disabled = false;
+    });
+  });
+
+  /* ---------- Survey path: 3 questions in, report unlocked, no contact info required ---------- */
+  var droneSurveyForm = document.getElementById('droneSurveyForm');
+  var droneSurveyStatus = document.getElementById('droneSurveyStatus');
+  var droneSurveySubmitBtn = document.getElementById('droneSurveySubmitBtn');
+  var SURVEY_SUBMIT_LABEL = 'Get the report';
+  var SURVEY_LOCKED_LABEL = 'Answer all 3 to unlock';
+
+  var surveyQuestions = {
+    q1: "How would you primarily use this delivery heatmap?",
+    q2: "What's your biggest challenge with new-teacher ramp-up today?",
+    q3: "How do you currently spot a teacher who's falling behind pace?"
+  };
+  var surveyAnswers = {q1:null, q2:null, q3:null};
+
+  function updateSurveyButtonState(){
+    var answeredCount = 0;
+    for(var k in surveyAnswers){ if(surveyAnswers[k]) answeredCount++; }
+    var allAnswered = answeredCount === 3;
+    droneSurveySubmitBtn.disabled = !allAnswered;
+    droneSurveySubmitBtn.textContent = allAnswered ? SURVEY_SUBMIT_LABEL : (SURVEY_LOCKED_LABEL + ' (' + answeredCount + '/3)');
+  }
+
+  var surveyOptButtons = document.querySelectorAll('.drona-survey-opt');
+  for(var i = 0; i < surveyOptButtons.length; i++){
+    (function(btn){
+      btn.addEventListener('click', function(){
+        var group = btn.closest('.drona-survey-q');
+        var qKey = group.getAttribute('data-q');
+        var siblings = group.querySelectorAll('.drona-survey-opt');
+        for(var j = 0; j < siblings.length; j++){ siblings[j].classList.remove('selected'); }
+        btn.classList.add('selected');
+        surveyAnswers[qKey] = btn.getAttribute('data-value');
+        updateSurveyButtonState();
+      });
+    })(surveyOptButtons[i]);
+  }
+
+  function resetSurvey(){
+    var selected = document.querySelectorAll('.drona-survey-opt.selected');
+    for(var i = 0; i < selected.length; i++){ selected[i].classList.remove('selected'); }
+    surveyAnswers.q1 = surveyAnswers.q2 = surveyAnswers.q3 = null;
+    updateSurveyButtonState();
+    droneSurveyStatus.textContent = '';
+    droneSurveyStatus.className = 'drona-modal-status';
+  }
+
+  droneSurveyForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    var answeredCount = 0;
+    for(var k in surveyAnswers){ if(surveyAnswers[k]) answeredCount++; }
+    if(answeredCount < 3) return;
+
+    droneSurveySubmitBtn.disabled = true;
+    droneSurveyStatus.textContent = 'Preparing your report…';
+    droneSurveyStatus.className = 'drona-modal-status';
+
+    generatePdfBlob().then(function(pdfBlob){
+      return blobToBase64(pdfBlob).then(function(base64){
+        var filename = REPORT_PDF_FILENAME.replace(/\.pdf$/i, '');
+        var payload = {
+          event: 'survey_submit', site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString(),
+          filename: filename, pdfBase64: base64,
+          surveyQ1: surveyQuestions.q1, surveyA1: surveyAnswers.q1,
+          surveyQ2: surveyQuestions.q2, surveyA2: surveyAnswers.q2,
+          surveyQ3: surveyQuestions.q3, surveyA3: surveyAnswers.q3
+        };
+        var sendPromise = TRACKING_ENDPOINT
+          ? fetch(TRACKING_ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)}).then(function(r){ return r.json(); }).catch(function(){ return {ok:false}; })
+          : Promise.resolve({ok:false});
+
+        return sendPromise.then(function(){
+          var dlUrl = URL.createObjectURL(pdfBlob);
+          var a = document.createElement('a');
+          a.href = dlUrl;
+          a.download = filename + '.pdf';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          droneSurveyStatus.textContent = 'Downloaded — thanks for answering!';
+          droneSurveyStatus.className = 'drona-modal-status success';
+          setTimeout(function(){ droneOverlay.hidden = true; resetSurvey(); }, 1800);
+        });
+      });
+    }).catch(function(err){
+      console.error(err);
+      droneSurveyStatus.textContent = 'Something went wrong generating the PDF. Please try again.';
+      droneSurveyStatus.className = 'drona-modal-status error';
+      droneSurveySubmitBtn.disabled = false;
     });
   });
 })();

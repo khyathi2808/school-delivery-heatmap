@@ -759,12 +759,61 @@
   var TRACKING_ENDPOINT = "";
   var SITE_NAME = "School Delivery Heatmap";
 
+  function getAnonId(){
+    var key = 'dronafy_anon_id';
+    var id = localStorage.getItem(key);
+    if(!id){
+      id = 'anon_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(key, id);
+    }
+    return id;
+  }
+  var ANON_ID = getAnonId();
+
   function trackEvent(eventName, extra){
     if(!TRACKING_ENDPOINT) return;
-    var payload = {event: eventName, site: SITE_NAME, page: location.href, timestamp: new Date().toISOString()};
+    var payload = {event: eventName, site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString()};
     if(extra){ for(var k in extra){ payload[k] = extra[k]; } }
     fetch(TRACKING_ENDPOINT, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(payload)}).catch(function(){});
   }
+
+  function trackBeacon(eventName, extra){
+    if(!TRACKING_ENDPOINT) return;
+    var payload = {event: eventName, site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString()};
+    if(extra){ for(var k in extra){ payload[k] = extra[k]; } }
+    if(navigator.sendBeacon){
+      navigator.sendBeacon(TRACKING_ENDPOINT, new Blob([JSON.stringify(payload)], {type:'text/plain;charset=utf-8'}));
+    } else {
+      trackEvent(eventName, extra);
+    }
+  }
+
+  trackEvent('page_view');
+
+  (function(){
+    var milestones = [25, 50, 75, 100];
+    var fired = {};
+    function checkScroll(){
+      var doc = document.documentElement;
+      var scrollTop = window.pageYOffset || doc.scrollTop;
+      var scrollable = (doc.scrollHeight - doc.clientHeight) || 1;
+      var pct = Math.min(100, Math.round((scrollTop / scrollable) * 100));
+      milestones.forEach(function(m){
+        if(pct >= m && !fired[m]){
+          fired[m] = true;
+          trackEvent('scroll_depth', {value: m});
+        }
+      });
+    }
+    window.addEventListener('scroll', checkScroll, {passive: true});
+  })();
+
+  var pageLoadTime = Date.now();
+  function sendTimeOnPage(){
+    trackBeacon('time_on_page', {value: Math.round((Date.now() - pageLoadTime) / 1000)});
+  }
+  window.addEventListener('pagehide', sendTimeOnPage);
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') sendTimeOnPage(); });
 
   var droneOverlay = document.getElementById('droneOverlay');
   var droneForm = document.getElementById('droneForm');
@@ -851,7 +900,7 @@
       return blobToBase64(pdfBlob).then(function(base64){
         var filename = SITE_NAME.replace(/\s+/g,'_') + '_Report';
         var payload = {
-          event: 'form_submit', site: SITE_NAME, page: location.href, timestamp: new Date().toISOString(),
+          event: 'form_submit', site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString(),
           name: name, school: school, email: email, phone: phone, filename: filename,
           pdfBase64: base64
         };

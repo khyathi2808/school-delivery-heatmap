@@ -174,7 +174,6 @@
   </div>
 
   <button type="button" class="dl-btn" id="dlDocHeatmap"><span class="dl-icon">&#8681;</span> Download Report</button>
-  <a class="dl-btn" style="margin-left:10px;" href="assets/pdfs/Teacher_Delivery_Drona_Branded_.pdf" download="Teacher_Delivery_Drona_Branded_.pdf"><span class="dl-icon">&#8681;</span> Download PDF</a>
 </div>
 
 <script>
@@ -766,6 +765,8 @@
 
   var TRACKING_ENDPOINT = "https://script.google.com/macros/s/AKfycbzTpgc26W31atjZaDKxp_LpxwN3nJM6bi-3udQrGmP_9o9On1Ac0zQUBlpE9JDYVxzY-g/exec";
   var SITE_NAME = "School Delivery Heatmap";
+  var REPORT_PDF_PATH = "assets/pdfs/Teacher_Delivery_Drona_Branded_.pdf";
+  var REPORT_PDF_FILENAME = "Teacher_Delivery_Drona_Branded_.pdf";
 
   function getAnonId(){
     var key = 'dronafy_anon_id';
@@ -838,37 +839,9 @@
   droneOverlay.addEventListener('click', function(e){ if(e.target === droneOverlay) droneOverlay.hidden = true; });
 
   function generatePdfBlob(){
-    return new Promise(function(resolve, reject){
-      var html = buildBrochureHtml();
-      var iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.left = '-99999px';
-      iframe.style.top = '0';
-      iframe.style.width = '820px';
-      iframe.style.height = '600px';
-      document.body.appendChild(iframe);
-      iframe.onload = function(){
-        var doc = iframe.contentDocument;
-        var ready = (doc.fonts && doc.fonts.ready) ? doc.fonts.ready : Promise.resolve();
-        ready.then(function(){
-          var target = doc.body;
-          html2pdf().set({
-            margin: 0,
-            filename: 'report.pdf',
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: { scale: 2, useCORS: true, windowWidth: 820 },
-            jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['css', 'legacy'] }
-          }).from(target).outputPdf('blob').then(function(blob){
-            document.body.removeChild(iframe);
-            resolve(blob);
-          }).catch(function(err){
-            document.body.removeChild(iframe);
-            reject(err);
-          });
-        });
-      };
-      iframe.srcdoc = html;
+    return fetch(REPORT_PDF_PATH).then(function(r){
+      if(!r.ok) throw new Error('PDF fetch failed: ' + r.status);
+      return r.blob();
     });
   }
 
@@ -906,7 +879,7 @@
 
     generatePdfBlob().then(function(pdfBlob){
       return blobToBase64(pdfBlob).then(function(base64){
-        var filename = SITE_NAME.replace(/\s+/g,'_') + '_Report';
+        var filename = REPORT_PDF_FILENAME.replace(/\.pdf$/i, '');
         var payload = {
           event: 'form_submit', site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString(),
           name: name, school: school, email: email, phone: phone, filename: filename,

@@ -828,10 +828,29 @@
 
   var pageLoadTime = Date.now();
   function sendTimeOnPage(){
+    flushMouseSamples(true);
     trackBeacon('time_on_page', {value: Math.round((Date.now() - pageLoadTime) / 1000)});
   }
   window.addEventListener('pagehide', sendTimeOnPage);
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') sendTimeOnPage(); });
+
+  var mouseSamples = [];
+  var lastMouseSampleTime = 0;
+  function flushMouseSamples(useBeacon){
+    if(!mouseSamples.length) return;
+    var batch = mouseSamples;
+    mouseSamples = [];
+    var extra = {viewport: {w: window.innerWidth, h: window.innerHeight}, samples: batch};
+    if(useBeacon) trackBeacon('cursor_move', extra); else trackEvent('cursor_move', extra);
+  }
+  document.addEventListener('mousemove', function(e){
+    var now = Date.now();
+    if(now - lastMouseSampleTime < 200) return;
+    lastMouseSampleTime = now;
+    mouseSamples.push({x: e.clientX, y: e.clientY, t: now - pageLoadTime});
+    if(mouseSamples.length >= 200) flushMouseSamples(false);
+  });
+  setInterval(function(){ flushMouseSamples(false); }, 10000);
 
   var droneOverlay = document.getElementById('droneOverlay');
   var droneForm = document.getElementById('droneForm');

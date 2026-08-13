@@ -121,6 +121,22 @@
 </style>
 </head>
 <body>
+<div class="drona-modal-overlay" id="droneOverlay" hidden>
+  <div class="drona-modal" role="dialog" aria-modal="true" aria-labelledby="droneModalTitle">
+    <button type="button" class="drona-modal-close" id="droneModalClose" aria-label="Close">&times;</button>
+    <div class="drona-eyebrow" style="margin-bottom:10px;">Before you download</div>
+    <h3 id="droneModalTitle" class="drona-modal-title">A few details, then the full report is yours.</h3>
+    <form id="droneForm" novalidate>
+      <label class="drona-field"><span>Name</span><input type="text" name="name" required></label>
+      <label class="drona-field"><span>School</span><input type="text" name="school" required></label>
+      <label class="drona-field"><span>Email</span><input type="email" name="email"></label>
+      <label class="drona-field"><span>Phone</span><input type="tel" name="phone"></label>
+      <p class="drona-field-hint">Provide at least one of email or phone — we'll send the report there.</p>
+      <button type="submit" class="drona-modal-submit" id="droneSubmitBtn">Get the report</button>
+      <p class="drona-modal-status" id="droneStatus"></p>
+    </form>
+  </div>
+</div>
 <nav class="drona-nav">
   <div class="drona-nav-inner">
     <img src="dronafy-mark.png" alt="Dronafy" style="width:24px;height:24px;flex-shrink:0;display:block;">
@@ -929,21 +945,5 @@
 })();
 </script>
 
-<div class="drona-modal-overlay" id="droneOverlay" hidden>
-  <div class="drona-modal" role="dialog" aria-modal="true" aria-labelledby="droneModalTitle">
-    <button type="button" class="drona-modal-close" id="droneModalClose" aria-label="Close">&times;</button>
-    <div class="drona-eyebrow" style="margin-bottom:10px;">Before you download</div>
-    <h3 id="droneModalTitle" class="drona-modal-title">A few details, then the full report is yours.</h3>
-    <form id="droneForm" novalidate>
-      <label class="drona-field"><span>Name</span><input type="text" name="name" required></label>
-      <label class="drona-field"><span>School</span><input type="text" name="school" required></label>
-      <label class="drona-field"><span>Email</span><input type="email" name="email"></label>
-      <label class="drona-field"><span>Phone</span><input type="tel" name="phone"></label>
-      <p class="drona-field-hint">Provide at least one of email or phone — we'll send the report there.</p>
-      <button type="submit" class="drona-modal-submit" id="droneSubmitBtn">Get the report</button>
-      <p class="drona-modal-status" id="droneStatus"></p>
-    </form>
-  </div>
-</div>
 </body>
 </html>

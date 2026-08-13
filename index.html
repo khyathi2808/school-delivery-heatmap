@@ -129,9 +129,8 @@
     <form id="droneForm" novalidate>
       <label class="drona-field"><span>Name</span><input type="text" name="name" required></label>
       <label class="drona-field"><span>School</span><input type="text" name="school" required></label>
-      <label class="drona-field"><span>Email</span><input type="email" name="email"></label>
-      <label class="drona-field"><span>Phone</span><input type="tel" name="phone"></label>
-      <p class="drona-field-hint">Provide at least one of email or phone — we'll send the report there.</p>
+      <label class="drona-field"><span>Email</span><input type="email" name="email" required></label>
+      <p class="drona-field-hint">We'll send the report to this email.</p>
       <button type="submit" class="drona-modal-submit" id="droneSubmitBtn">Get the report</button>
       <p class="drona-modal-status" id="droneStatus"></p>
     </form>
@@ -887,15 +886,14 @@
     var name = (fd.get('name')||'').trim();
     var school = (fd.get('school')||'').trim();
     var email = (fd.get('email')||'').trim();
-    var phone = (fd.get('phone')||'').trim();
 
     if(!name || !school){
       droneStatus.textContent = 'Please fill in your name and school.';
       droneStatus.className = 'drona-modal-status error';
       return;
     }
-    if(!email && !phone){
-      droneStatus.textContent = 'Please provide an email or phone number.';
+    if(!email){
+      droneStatus.textContent = "Please provide your email — we'll send the report there.";
       droneStatus.className = 'drona-modal-status error';
       return;
     }
@@ -909,7 +907,7 @@
         var filename = REPORT_PDF_FILENAME.replace(/\.pdf$/i, '');
         var payload = {
           event: 'form_submit', site: SITE_NAME, page: location.href, anonId: ANON_ID, timestamp: new Date().toISOString(),
-          name: name, school: school, email: email, phone: phone, filename: filename,
+          name: name, school: school, email: email, filename: filename,
           pdfBase64: base64
         };
         var sendPromise = TRACKING_ENDPOINT
@@ -927,10 +925,8 @@
 
           if(result && result.emailSent){
             droneStatus.textContent = 'Downloaded — and a copy is on its way to your email.';
-          } else if(email){
-            droneStatus.textContent = "Downloaded. (Email delivery isn't connected yet — you have the file directly.)";
           } else {
-            droneStatus.textContent = 'Downloaded.';
+            droneStatus.textContent = "Downloaded. (Email delivery isn't connected yet — you have the file directly.)";
           }
           droneStatus.className = 'drona-modal-status success';
           setTimeout(function(){ droneOverlay.hidden = true; droneForm.reset(); droneSubmitBtn.disabled = false; }, 1800);

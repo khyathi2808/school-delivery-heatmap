@@ -94,12 +94,12 @@
 
   .dl-btn {
     display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 600; color: #fff; background: #1f2430;
-    border: none; border-radius: 8px; padding: 10px 18px; margin-top: 22px;
+    font-size: 13.026px; font-weight: 600; color: #fff; background: #1f2430;
+    border: none; border-radius: 8px; padding: 10.02px 18.036px; margin-top: 22px;
     cursor: pointer; transition: background .15s ease;
   }
   .dl-btn:hover { background: #333a48; }
-  .dl-btn .dl-icon { font-size: 14px; }
+  .dl-btn .dl-icon { font-size: 14.028px; }
 
   /* ===== GATE MODAL ===== */
   .drona-modal-overlay{position:fixed;inset:0;background:rgba(4,10,6,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;}
@@ -173,7 +173,9 @@
     <div class="ramp-summary" id="rampSummary"></div>
   </div>
 
-  <button type="button" class="dl-btn" id="dlDocHeatmap"><span class="dl-icon">&#8681;</span> Download Report</button>
+  <div style="text-align:center;">
+    <button type="button" class="dl-btn" id="dlDocHeatmap"><span class="dl-icon">&#8681;</span> Download Report</button>
+  </div>
 </div>
 
 <script>
@@ -799,6 +801,13 @@
 
   trackEvent('page_view');
 
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('button, a[href], [role="button"], input[type="submit"], input[type="button"]');
+    if(!el) return;
+    var label = (el.getAttribute('aria-label') || el.textContent || el.id || el.tagName || '').trim().replace(/\s+/g, ' ').slice(0, 80);
+    trackEvent('cta_click', {label: label, elementId: el.id || '', tag: el.tagName.toLowerCase()});
+  });
+
   (function(){
     var milestones = [25, 50, 75, 100];
     var fired = {};
@@ -830,7 +839,6 @@
   var droneSubmitBtn = document.getElementById('droneSubmitBtn');
 
   document.getElementById('dlDocHeatmap').addEventListener('click', function(){
-    trackEvent('cta_click');
     droneOverlay.hidden = false;
     droneStatus.textContent = '';
     droneStatus.className = 'drona-modal-status';

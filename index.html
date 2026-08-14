@@ -2,20 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>School Delivery Heatmap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Delivery Heatmap — Dronalytics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,600;0,700;1,600&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f4f5f7;
-    color: #1f2430;
-    margin: 0;
-    padding: 0;
+  :root{
+    --ink-900:#101B33; --ink-800:#16233F;
+    --paper:#EEF1EA; --card:#FBFBF8;
+    --gold:#B98B2E; --gold-bright:#D8AC4C;
+    --forest:#2F5D45; --forest-dim:#DCE6DD;
+    --competent:#5C8F71; --competent-dim:#E7EEE0;
+    --amber:#A56A1D; --amber-dim:#F0E3CC;
+    --rust:#9C3B30; --rust-dim:#F1DAD5;
+    --slate:#5B6472; --rule:#D8D4C4;
   }
-  #app { max-width: 920px; margin: 0 auto; padding: 24px; }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink-800);font-family:'Inter',sans-serif;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 70px;}
 
   /* ===== DRONA BRAND (per DRONA-BRAND-SPEC.md) ===== */
   :root{
@@ -27,79 +33,93 @@
     --drona-font-sans:'IBM Plex Sans',system-ui,sans-serif;
   }
   .drona-nav{background:var(--drona-felt-0);padding:16px 28px;}
-  .drona-nav-inner{max-width:920px;margin:0 auto;display:flex;align-items:center;gap:10px;}
+  .drona-nav-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:10px;}
 
   .drona-hero{position:relative;overflow:hidden;background:var(--drona-felt-1);color:var(--drona-text);padding:80px 24px;text-align:center;font-variant-numeric:tabular-nums;}
-  .drona-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:auto;opacity:.10;pointer-events:none;}
-  .drona-hero-inner{position:relative;max-width:600px;margin:0 auto;}
-  .drona-hero h1{font-family:var(--drona-font-serif);font-weight:700;font-size:clamp(44px,7vw,72px);line-height:1.05;margin:0 0 18px;color:var(--drona-text);}
+  .drona-watermark{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:480px;height:auto;opacity:.10;pointer-events:none;}
+  .drona-hero-inner{position:relative;max-width:640px;margin:0 auto;}
+  .drona-hero h1{font-family:var(--drona-font-serif);font-weight:700;font-size:clamp(48px,8vw,88px);line-height:1.05;margin:0 0 18px;color:var(--drona-text);}
   .drona-hero h1 .dot{color:var(--drona-gold);}
-  .drona-hero-sub{font-family:var(--drona-font-serif);font-style:italic;font-size:clamp(15px,2vw,18px);line-height:1.5;color:var(--drona-text-secondary);margin:0 0 30px;}
-  .drona-eyebrow{font-family:'IBM Plex Mono',monospace;font-weight:500;letter-spacing:.28em;font-size:10.5px;text-transform:uppercase;color:var(--drona-gold);}
+  .drona-hero-sub{font-family:var(--drona-font-serif);font-style:italic;font-size:clamp(16px,2vw,20px);line-height:1.5;color:var(--drona-text-secondary);margin:0 0 34px;}
+  .drona-eyebrow{font-family:'IBM Plex Mono',monospace;font-weight:500;letter-spacing:.32em;font-size:11px;text-transform:uppercase;color:var(--drona-gold);}
 
-  .drona-explainer{background:var(--drona-felt-1);color:var(--drona-text);padding:64px 24px;text-align:center;font-variant-numeric:tabular-nums;}
-  .drona-explainer-inner{max-width:640px;margin:0 auto;}
-  .drona-explainer h2{font-family:var(--drona-font-serif);font-weight:600;font-size:clamp(22px,3.2vw,30px);line-height:1.28;margin:14px 0 16px;color:var(--drona-text);}
+  .drona-explainer{background:var(--drona-felt-1);color:var(--drona-text);padding:72px 24px;text-align:center;font-variant-numeric:tabular-nums;}
+  .drona-explainer-inner{max-width:680px;margin:0 auto;}
+  .drona-explainer h2{font-family:var(--drona-font-serif);font-weight:600;font-size:clamp(24px,3.6vw,34px);line-height:1.28;margin:16px 0 18px;color:var(--drona-text);}
   .drona-explainer h2 em{font-style:italic;color:var(--drona-gold-bright);font-weight:600;}
-  .drona-explainer p{font-family:var(--drona-font-sans);font-size:14px;line-height:1.65;color:var(--drona-text-secondary);margin:0 0 26px;}
-  .drona-scroll{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;color:var(--drona-gold);text-decoration:none;border:1px solid var(--drona-line-gold);border-radius:24px;padding:8px 18px;display:inline-block;transition:background .15s ease;}
+  .drona-explainer p{font-family:var(--drona-font-sans);font-size:15px;line-height:1.65;color:var(--drona-text-secondary);margin:0 0 30px;}
+  .drona-scroll{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.06em;color:var(--drona-gold);text-decoration:none;border:1px solid var(--drona-line-gold);border-radius:24px;padding:9px 20px;display:inline-block;transition:background .15s ease;}
   .drona-scroll:hover{background:rgba(201,168,76,.12);}
-  h2 { margin: 0 0 4px; font-size: 20px; }
-  .sub { font-size: 13px; color: #666; margin-bottom: 18px; }
+
+  /* ===== CARD ===== */
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-bottom:34px;}
+  @media (max-width:920px){.row2{grid-template-columns:1fr;}}
+  .card{
+    background:var(--card);border-radius:14px;
+    box-shadow:0 1px 2px rgba(16,27,51,.05), 0 8px 24px rgba(16,27,51,.06);
+    padding:30px 32px 28px;margin-bottom:34px;
+  }
+  .card .eyebrow-row{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  .variant-label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);}
+  .card h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin:0 0 4px;color:var(--ink-900);}
+  .card .sub{font-size:13.5px;color:var(--slate);margin:0 0 22px;}
+  .takeaway{font-family:'Fraunces',serif;font-style:italic;font-size:13.5px;color:var(--slate);margin-top:20px;padding-top:14px;border-top:1px solid var(--rule);}
+
   table { border-collapse: separate; border-spacing: 6px; width: 100%; }
-  th { font-size: 12px; color: #666; font-weight: 600; padding: 4px; text-align: center; }
-  th.rowlabel, td.rowlabel { text-align: right; padding-right: 10px; font-size: 12.5px; font-weight: 600; color: #444; }
+  th { font-family:'IBM Plex Mono',monospace; font-size: 10.5px; letter-spacing:.05em; text-transform:uppercase; color: var(--slate); font-weight: 500; padding: 3px 2px; text-align: center; }
+  th.rowlabel, td.rowlabel { text-align: right; padding-right: 8px; font-family:'IBM Plex Mono',monospace; font-size: 10.5px; font-weight: 500; color: var(--ink-800); white-space: nowrap; }
   td.cell {
-    border-radius: 10px; height: 62px; text-align: center; vertical-align: middle;
-    cursor: pointer; position: relative; font-size: 11.5px; font-weight: 600; color: white;
+    border-radius: 7px; height: 56px; text-align: center; vertical-align: middle;
+    cursor: pointer; position: relative; font-family:'IBM Plex Mono',monospace; font-size: 10.5px; font-weight: 500; color: #fff;
     transition: transform .1s ease;
   }
-  td.cell:hover { transform: scale(1.04); box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
-  td.cell.na { background: #eceef1; color: #b7bac0; cursor: default; }
+  td.cell:hover { transform: scale(1.04); box-shadow: 0 3px 8px rgba(16,27,51,.15); }
+  td.cell.na { background: var(--rule); color: var(--slate); cursor: default; }
   td.cell.na:hover { transform: none; box-shadow: none; }
-  .cell-count { font-size: 10px; font-weight: 400; opacity: 0.9; }
-  td.cell.mixed { color: #2a2a2a; text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
-  .mixed-tag { font-size: 9.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; opacity: 0.85; }
-  .legend { display: flex; gap: 16px; margin: 16px 0 20px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #444; }
-  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .cell-count { font-size: 9.5px; font-weight: 400; opacity: 0.9; }
+  td.cell.mixed { color: var(--ink-900); text-shadow: 0 1px 2px rgba(255,255,255,0.6); }
+  .mixed-tag { font-size: 9px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.85; }
+  .legend { display: flex; gap: 16px; margin: 16px 0 0; flex-wrap: wrap; font-family:'IBM Plex Mono',monospace; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--slate); }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
   #detail {
-    background: white; border: 1px solid #e6e8ec; border-radius: 12px; padding: 14px;
-    display: none;
+    background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 16px;
+    margin-top: 18px; display: none;
   }
-  #detail h3 { margin: 0 0 8px; font-size: 14.5px; }
-  .trow { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-top: 1px solid #f0f1f3; font-size: 13px; cursor: pointer; border-radius: 6px; }
-  .trow:hover { background: #f7f8fa; }
+  #detail h3 { font-family:'Fraunces',serif; font-weight:500; margin: 0 0 8px; font-size: 15px; color: var(--ink-900); }
+  .trow { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-top: 1px solid var(--rule); font-size: 13px; cursor: pointer; border-radius: 6px; }
+  .trow:hover { background: var(--card); }
   .trow:first-of-type { border-top: none; }
-  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 600; }
-  .panel { background: #fafbfc; border: 1px solid #eceef1; border-radius: 10px; padding: 12px; margin-top: 10px; }
-  .panel-title { font-size: 12px; font-weight: 600; color: #444; margin-bottom: 6px; }
-  .legend-row { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; font-size: 11.5px; }
+  .badge { font-family:'IBM Plex Mono',monospace; font-size: 10px; letter-spacing:.05em; text-transform:uppercase; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 12px; margin-top: 10px; }
+  .panel-title { font-family:'IBM Plex Mono',monospace; font-size: 10.5px; letter-spacing:.04em; text-transform:uppercase; font-weight: 500; color: var(--slate); margin-bottom: 6px; }
+  .legend-row { display: flex; gap: 14px; margin-top: 6px; flex-wrap: wrap; font-size: 11px; color: var(--slate); }
 
-  #rampSection { background: white; border: 1px solid #e6e8ec; border-radius: 12px; padding: 16px; margin-top: 22px; }
-  #rampSection h2 { font-size: 17px; margin: 0 0 4px; }
-  .chips { display: flex; gap: 7px; flex-wrap: wrap; margin: 10px 0 14px; }
+  .chips { display: flex; gap: 7px; flex-wrap: wrap; margin: 6px 0 16px; }
   .chip {
-    padding: 5px 12px; border-radius: 20px; font-size: 12.5px; cursor: pointer;
-    border: 1px solid #d7dae0; background: white; color: #444; font-weight: 500;
+    padding: 6px 14px; border-radius: 20px; font-family:'IBM Plex Mono',monospace; font-size: 11px; cursor: pointer;
+    border: 1px solid var(--rule); background: var(--card); color: var(--slate); font-weight: 500;
   }
-  .chip.active { border-color: transparent; color: white; }
-  .chip.all.active { background: #444; }
-  .ramp-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .chip.active { border-color: transparent; color: #fff; }
+  .chip.all.active { background: var(--ink-900); }
+  .ramp-summary { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
   .ramp-card {
-    flex: 1 1 150px; border-radius: 9px; padding: 9px 11px; font-size: 12px;
+    flex: 1 1 150px; border-radius: 9px; padding: 10px 12px; font-size: 12px;
   }
-  .ramp-card .rname { font-weight: 600; font-size: 12.5px; margin-bottom: 2px; }
+  .ramp-card .rname { font-family:'Fraunces',serif; font-weight: 500; font-size: 13px; margin-bottom: 2px; color: var(--ink-900); }
   .ramp-card .rstat { font-size: 11px; }
 
-  .dl-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13.026px; font-weight: 600; color: #fff; background: #1f2430;
-    border: none; border-radius: 8px; padding: 10.02px 18.036px; margin-top: 22px;
-    cursor: pointer; transition: background .15s ease;
+  .dl-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:11.523px;letter-spacing:.04em;
+    color:#fff;background:var(--ink-900);border:none;border-radius:8px;
+    padding:9.018px 16.032px;margin-top:16px;cursor:pointer;text-decoration:none;
+    transition:background .15s ease;
   }
-  .dl-btn:hover { background: #333a48; }
-  .dl-btn .dl-icon { font-size: 14.028px; }
+  .dl-btn:hover{background:#1E2E52;}
+  .dl-btn .dl-icon{font-size:13.026px;}
+
+  footer{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate);padding:20px 0 0;}
 
   /* ===== GATE MODAL ===== */
   .drona-modal-overlay{position:fixed;inset:0;background:rgba(4,10,6,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;}
@@ -211,9 +231,9 @@
 </div>
 <nav class="drona-nav">
   <div class="drona-nav-inner">
-    <img src="dronafy-mark.png" alt="Dronafy" style="width:24px;height:24px;flex-shrink:0;display:block;">
+    <img src="dronafy-mark.png" alt="Dronafy" style="width:26px;height:26px;flex-shrink:0;display:block;">
     <div style="display:flex;flex-direction:column;gap:1px">
-      <span style="font-family:var(--drona-font-serif);font-weight:600;font-size:14px;color:var(--drona-gold);line-height:1;">Dronafy</span>
+      <span style="font-family:var(--drona-font-serif);font-weight:600;font-size:15px;color:var(--drona-gold);line-height:1;">Dronafy</span>
       <span style="font-family:var(--drona-font-sans);font-weight:400;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--drona-text-secondary);">An Altumind Venture</span>
     </div>
   </div>
@@ -221,42 +241,55 @@
 
 <section class="drona-hero drona-explainer">
   <div class="drona-explainer-inner">
-    <div class="drona-eyebrow">Time · Priority — Teacher Delivery</div>
     <h2>A dip in results shows up weeks later — <em>this shows up on week one.</em></h2>
     <p>Every classroom, and every new hire's ramp, filtered down to where a principal should actually look first.</p>
     <a class="drona-scroll" href="#viz">See the delivery heatmap ↓</a>
   </div>
 </section>
 
-<div id="app">
-  <a id="viz"></a>
-  <h2>School Delivery Heatmap</h2>
-  <div class="sub">Every grade &times; subject combination, colored by delivery status. Click a cell, then click a teacher's name to see their trajectory.</div>
+<div class="wrap" id="viz">
 
-  <div class="legend" id="legend"></div>
-  <table id="grid"></table>
-  <div id="detail"></div>
+  <div class="row2" style="grid-template-columns:1fr;max-width:640px;margin-left:auto;margin-right:auto;">
 
-  <div id="rampSection">
-    <h2>New-Teacher Ramp Curve</h2>
-    <div class="sub" style="margin-bottom:0;">How fast each new hire's classes are closing the gap to expected pace, against a typical ramp benchmark.</div>
-    <div class="chips" id="rampChips"></div>
-    <div id="rampChartBox"></div>
-    <div class="ramp-summary" id="rampSummary"></div>
+    <div class="card">
+      <div class="eyebrow-row">
+        <span class="variant-label">Grade × Subject Heatmap</span>
+      </div>
+      <h2>School Delivery Heatmap</h2>
+      <div class="sub">Every grade × subject combination, colored by delivery status. Click a cell, then click a teacher's name to see their trajectory.</div>
+
+      <div class="legend" id="legend"></div>
+      <table id="grid"></table>
+      <div id="detail"></div>
+    </div>
+
+    <div class="card">
+      <div class="eyebrow-row">
+        <span class="variant-label">New-Teacher Ramp Curve</span>
+      </div>
+      <h2>New-Teacher Ramp Curve</h2>
+      <div class="sub" style="margin-bottom:0;">How fast each new hire's classes are closing the gap to expected pace, against a typical ramp benchmark.</div>
+      <div class="chips" id="rampChips"></div>
+      <div id="rampChartBox"></div>
+      <div class="ramp-summary" id="rampSummary"></div>
+    </div>
+
   </div>
 
   <div style="text-align:center;">
     <button type="button" class="dl-btn" id="dlDocHeatmap"><span class="dl-icon">&#8681;</span> Download Report</button>
   </div>
+
+<footer>Sample data · March 2026 — Dronalytics School Pretotype</footer>
 </div>
 
 <script>
 (function(){
   var STATUS_META = {
-    'early-support': { label: 'Early Support', color: '#c0392b', bg:'#fbe9e7', rank:4 },
-    'declining':     { label: 'Declining',     color: '#d98324', bg:'#fdf1e0', rank:3 },
-    'improving':     { label: 'Improving',     color: '#2b7de0', bg:'#e9f2fd', rank:2 },
-    'on-track':      { label: 'On Track',      color: '#2f9e5a', bg:'#e8f7ee', rank:1 }
+    'early-support': { label: 'Early Support', color: '#9C3B30', bg:'#F1DAD5', rank:4 },
+    'declining':     { label: 'Declining',     color: '#A56A1D', bg:'#F0E3CC', rank:3 },
+    'improving':     { label: 'Improving',     color: '#5C8F71', bg:'#E7EEE0', rank:2 },
+    'on-track':      { label: 'On Track',      color: '#2F5D45', bg:'#DCE6DD', rank:1 }
   };
   var MONTHS = ['Feb','Mar','Apr','May','Jun','Jul'];
 
@@ -302,17 +335,17 @@
 
   // Shared y-axis label scheme for every chart in this file (trajectory, comparison, ramp curve)
   var AXIS_LABELS = [
-    { label: 'EXCELLING',     color: '#2f9e5a' },
-    { label: 'ON TRACK',      color: '#2b7de0' },
-    { label: 'IMPROVING',     color: '#d98324' },
-    { label: 'NEEDS SUPPORT', color: '#c0392b' }
+    { label: 'EXCELLING',     color: '#2F5D45' },
+    { label: 'ON TRACK',      color: '#5C8F71' },
+    { label: 'IMPROVING',     color: '#A56A1D' },
+    { label: 'NEEDS SUPPORT', color: '#9C3B30' }
   ];
   function drawAxisLabels(min, max, y, w, pad){
     var svg = '';
     for(var i=0;i<4;i++){
       var gv = min + (max-min)*(3-i)/3;
       var gy = y(gv);
-      svg += '<line x1="'+pad.l+'" y1="'+gy+'" x2="'+(w-pad.r)+'" y2="'+gy+'" stroke="#eee" stroke-width="1"/>';
+      svg += '<line x1="'+pad.l+'" y1="'+gy+'" x2="'+(w-pad.r)+'" y2="'+gy+'" stroke="#D8D4C4" stroke-width="1"/>';
       svg += '<text x="'+pad.l+'" y="'+(gy-3)+'" font-size="8" fill="'+AXIS_LABELS[i].color+'" font-weight="600" letter-spacing="0.03em">'+AXIS_LABELS[i].label+'</text>';
     }
     return svg;
@@ -340,8 +373,8 @@
     var m = STATUS_META[k];
     legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:'+m.color+'"></span>'+m.label+'</div>';
   });
-  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:#eceef1"></span>No section taught</div>';
-  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:linear-gradient(90deg,#2f9e5a,#d98324)"></span>Mixed &mdash; sections disagree</div>';
+  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:#D8D4C4"></span>No section taught</div>';
+  legend.innerHTML += '<div class="legend-item"><span class="swatch" style="background:linear-gradient(90deg,#2F5D45,#A56A1D)"></span>Mixed &mdash; sections disagree</div>';
 
   function teachersFor(grade, subject){
     return teachers.filter(function(t){ return t.grade===grade && t.subject===subject; });
@@ -397,7 +430,7 @@
     function y(v){ return pad.t + innerH - ((v-min)/(max-min))*innerH; }
     var svg = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
     svg += drawAxisLabels(min, max, y, w, pad);
-    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#999">'+m+'</text>'; });
+    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#5B6472">'+m+'</text>'; });
     datasets.forEach(function(d){
       var pts = d.values.map(function(v,i){ return x(i).toFixed(1)+','+y(v).toFixed(1); }).join(' ');
       svg += '<polyline points="'+pts+'" fill="none" stroke="'+d.color+'" stroke-width="'+(d.muted?1.6:2.4)+'" '+
@@ -417,15 +450,15 @@
     var html = '<div class="panel-title">'+t.name+' (Sec '+t.section+') &mdash; Actual vs Expected</div>'+
       lineChartSVG([
         {color: meta.color, values: t.actual},
-        {color: '#999', dashed:true, values: t.expected}
+        {color: '#5B6472', dashed:true, values: t.expected}
       ], MONTHS, 440, 170)+
-      '<div class="legend-row"><span><span style="color:'+meta.color+'">&#9632;</span> '+t.name+'</span><span><span style="color:#999">&#9632;</span> Expected (dashed)</span></div>';
+      '<div class="legend-row"><span><span style="color:'+meta.color+'">&#9632;</span> '+t.name+'</span><span><span style="color:#5B6472">&#9632;</span> Expected (dashed)</span></div>';
 
     if(others.length){
       var datasets = list.map(function(x){
         return { color: STATUS_META[x.status].color, values: x.actual, muted: x.id!==id };
       });
-      datasets.push({ color:'#bbb', dashed:true, values: t.expected, muted:true });
+      datasets.push({ color:'#5B6472', dashed:true, values: t.expected, muted:true });
       html += '<div class="panel-title" style="margin-top:12px;">All sections in Grade '+t.grade+' '+t.subject+' (this one highlighted)</div>'+
         lineChartSVG(datasets, MONTHS, 440, 170)+
         '<div class="legend-row">'+list.map(function(x){
@@ -467,11 +500,11 @@
     function y(v){ return pad.t + innerH - ((v-min)/(max-min))*innerH; }
     var svg = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">';
     svg += drawAxisLabels(min, max, y, w, pad);
-    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#999">'+m+'</text>'; });
+    months.forEach(function(m,i){ svg += '<text x="'+(x(i)-8)+'" y="'+(h-4)+'" font-size="8.5" fill="#5B6472">'+m+'</text>'; });
     // typical-range band
     var upperPts = band.upper.map(function(v,i){ return x(i)+','+y(v); });
     var lowerPts = band.lower.map(function(v,i){ return x(i)+','+y(v); }).reverse();
-    svg += '<polygon points="'+upperPts.concat(lowerPts).join(' ')+'" fill="#8a8f99" opacity="0.12"/>';
+    svg += '<polygon points="'+upperPts.concat(lowerPts).join(' ')+'" fill="#5B6472" opacity="0.12"/>';
     lines.forEach(function(d){
       var pts = d.values.map(function(v,i){ return x(i).toFixed(1)+','+y(v).toFixed(1); }).join(' ');
       svg += '<polyline points="'+pts+'" fill="none" stroke="'+d.color+'" stroke-width="'+(d.muted?1.6:2.4)+'" '+
@@ -497,13 +530,13 @@
     var lines = newHires.map(function(t){
       return { color: STATUS_META[t.status].color, values: t.gapSeries, muted: !!focusId && focusId!==t.id };
     });
-    lines.push({ color:'#555', dashed:true, values: TYPICAL_RAMP, muted:false });
+    lines.push({ color:'#16233F', dashed:true, values: TYPICAL_RAMP, muted:false });
 
     document.getElementById('rampChartBox').innerHTML =
       rampChartSVG(lines, RAMP_BAND, RAMP_MONTHS, 620, 210) +
       '<div class="legend-row" style="margin-top:6px;">'+
-      '<span><span style="color:#555">&#9632;</span> Typical ramp (reaches pace by M'+typicalReach+')</span>'+
-      '<span><span style="color:#8a8f99">&#9632;</span> Typical range band</span>'+
+      '<span><span style="color:#16233F">&#9632;</span> Typical ramp (reaches pace by M'+typicalReach+')</span>'+
+      '<span><span style="color:#5B6472">&#9632;</span> Typical range band</span>'+
       '</div>';
 
     var summary = document.getElementById('rampSummary');
@@ -514,13 +547,13 @@
       var n = t.gapSeries.length-1;
       var startedOnPace = t.gapSeries[0] >= REACH_PACE_THRESHOLD;
       var endingGap = t.gapSeries[n];
-      if(rm && rm <= typicalReach){ verdict = 'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')'; vcolor='#2f9e5a'; }
-      else if(rm){ verdict = 'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')'; vcolor='#d98324'; }
-      else if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ verdict = 'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping'; vcolor='#c0392b'; }
-      else { verdict = 'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp'; vcolor='#c0392b'; }
+      if(rm && rm <= typicalReach){ verdict = 'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')'; vcolor='#2F5D45'; }
+      else if(rm){ verdict = 'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')'; vcolor='#A56A1D'; }
+      else if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ verdict = 'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping'; vcolor='#9C3B30'; }
+      else { verdict = 'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp'; vcolor='#9C3B30'; }
       return '<div class="ramp-card" style="background:'+m.bg+';">'+
         '<div class="rname">'+t.name+'</div>'+
-        '<div style="font-size:11px;color:#777;margin-bottom:4px;">'+t.subject+' &middot; Grade '+t.grade+' &middot; joined '+t.joined+'</div>'+
+        '<div style="font-size:11px;color:#5B6472;margin-bottom:4px;">'+t.subject+' &middot; Grade '+t.grade+' &middot; joined '+t.joined+'</div>'+
         '<div class="rstat" style="color:'+vcolor+';font-weight:600;">'+verdict+'</div></div>';
     }).join('');
   }
@@ -536,21 +569,21 @@
 
       var rows = list.map(function(t){
         var m = STATUS_META[t.status];
-        return '<div class="trow" data-id="'+t.id+'"><span>'+t.name+' <span style="color:#999;font-weight:400;">(Sec '+t.section+')</span></span>'+
+        return '<div class="trow" data-id="'+t.id+'"><span>'+t.name+' <span style="color:#5B6472;font-weight:400;">(Sec '+t.section+')</span></span>'+
           '<span><span class="badge" style="background:'+m.bg+';color:'+m.color+';">'+m.label+'</span> '+
-          '<span style="color:'+(t.gap<0?'#c0392b':'#2f9e5a')+';margin-left:8px;font-weight:600;">'+t.gap+' pts</span></span></div>';
+          '<span style="color:'+(t.gap<0?'#9C3B30':'#2F5D45')+';margin-left:8px;font-weight:600;">'+t.gap+' pts</span></span></div>';
       }).join('');
 
       var note = '';
       if(isMixed(list)){
-        note = '<div style="font-size:11.5px;color:#a05a00;margin-top:8px;background:#fdf1e0;padding:8px 10px;border-radius:8px;">'+
+        note = '<div style="font-size:11.5px;color:#A56A1D;margin-top:8px;background:#F0E3CC;padding:8px 10px;border-radius:8px;">'+
           'These sections disagree &mdash; same grade, same subject, different outcomes. That points to a teacher-specific gap, not a subject-wide problem.</div>';
       } else if(list.length>1){
-        note = '<div style="font-size:11.5px;color:#888;margin-top:8px;">Both sections agree &mdash; likely a subject/grade-wide pattern rather than one teacher.</div>';
+        note = '<div style="font-size:11.5px;color:#5B6472;margin-top:8px;">Both sections agree &mdash; likely a subject/grade-wide pattern rather than one teacher.</div>';
       }
 
       det.innerHTML = '<h3>Grade '+g+' &middot; '+s+'</h3>' + rows + note +
-        '<div style="font-size:11px;color:#aaa;margin-top:8px;">Click a teacher&rsquo;s name above to see their trajectory.</div>'+
+        '<div style="font-size:11px;color:#5B6472;margin-top:8px;">Click a teacher&rsquo;s name above to see their trajectory.</div>'+
         '<div id="trajectoryPanel"></div>';
 
       det.querySelectorAll('.trow').forEach(function(row){
@@ -720,10 +753,10 @@
     var n = t.gapSeries.length-1;
     var startedOnPace = t.gapSeries[0] >= REACH_PACE_THRESHOLD;
     var endingGap = t.gapSeries[n];
-    if(rm && rm <= typicalReach){ return { text:'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')', color:'#2f9e5a' }; }
-    if(rm){ return { text:'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')', color:'#d98324' }; }
-    if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ return { text:'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping', color:'#c0392b' }; }
-    return { text:'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp', color:'#c0392b' };
+    if(rm && rm <= typicalReach){ return { text:'Reached pace by M'+rm+' — ahead of typical (M'+typicalReach+')' }; }
+    if(rm){ return { text:'Reached pace by M'+rm+' — slower than typical (M'+typicalReach+')' }; }
+    if(startedOnPace && endingGap < REACH_PACE_THRESHOLD){ return { text:'Started on pace, then fell to '+endingGap+' pts behind by M6 — declining, not ramping' }; }
+    return { text:'Not yet at pace after M6 ('+endingGap+' pts behind) — behind typical ramp' };
   }
 
   var STATUS_TO_PG = {'early-support':'red', 'declining':'amber', 'improving':'slate', 'on-track':'green'};
@@ -812,7 +845,7 @@
       headline: 'A dip in results shows up weeks later — <em>this shows up on week one.</em>',
       subhead: "Every classroom, and every new hire's ramp, filtered down to where a principal should actually look first.",
       calloutHtml: execSummary,
-      screenshotEyebrow: "Time · Priority",
+      screenshotEyebrow: "Live Screenshot",
       screenshotTitle: "Where delivery needs attention, at a glance",
       screenshotSub: "Every grade × subject combination, colored by the most serious status among its sections.",
       screenshotBodyHtml: screenshotHeatHtml(),
